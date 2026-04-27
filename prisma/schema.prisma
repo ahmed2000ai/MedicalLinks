@@ -1,0 +1,646 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// ENUMS
+// -----------------------------------------------------------------------------
+
+enum UserRole {
+  APPLICANT
+  RECRUITER
+  ADMIN
+  HOSPITAL_CONTACT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum LanguageProficiency {
+  BASIC
+  CONVERSATIONAL
+  FLUENT
+  NATIVE
+}
+
+enum DocumentType {
+  CV
+  PASSPORT
+  MEDICAL_DEGREE
+  INTERNSHIP_CERT
+  RESIDENCY_CERT
+  FELLOWSHIP_CERT
+  MEDICAL_LICENSE
+  BOARD_CERTIFICATION
+  GOOD_STANDING_CERT
+  EXPERIENCE_CERT
+  LANGUAGE_CERT
+  DATAFLOW_REPORT
+  OTHER
+}
+
+enum OpportunityStatus {
+  INTAKE
+  ACTIVE
+  PAUSED
+  CLOSED
+  FILLED
+}
+
+enum ApplicationStatus {
+  DRAFT
+  NEW
+  SCREENING
+  QUALIFIED
+  NURTURE
+  NEEDS_DOCUMENTS
+  SHORTLIST_SENT
+  INTERVIEWING
+  OFFER_STAGE
+  ONBOARDING
+  HIRED
+  REJECTED
+  WITHDRAWN
+  ON_HOLD
+  ARCHIVED
+}
+
+enum ReadinessLabel {
+  READY_NOW
+  NEAR_READY
+  FUTURE_PIPELINE
+  NOT_A_FIT
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  LOCUM
+}
+
+enum InterviewType {
+  VIRTUAL
+  IN_PERSON
+}
+
+// -----------------------------------------------------------------------------
+// IDENTITY
+// -----------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String? // Nullable if using OAuth/SSO
+  role         UserRole @default(APPLICANT)
+
+  firstName String
+  lastName  String
+  phone     String?
+  whatsapp  String?
+
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Profile relations based on role
+  applicantProfile ApplicantProfile?
+  recruiterProfile RecruiterProfile?
+  hospitalContact  HospitalContact?
+
+  // Communication relations
+  conversations    ConversationParticipant[]
+  messages         Message[]
+  notifications    Notification[]
+}
+
+// -----------------------------------------------------------------------------
+// APPLICANT DOMAIN
+// -----------------------------------------------------------------------------
+
+model ApplicantProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  gender             Gender?
+  nationality        String?
+  dateOfBirth        DateTime?
+  countryOfResidence String?
+  currentCity        String?
+
+  professionalSummary  String? @db.Text
+  totalYearsExperience Int?
+  postSpecialtyExp     Int?
+
+  currentEmployer  String?
+  currentJobTitle  String?
+  noticePeriodDays Int?
+
+  readinessLabel ReadinessLabel?
+  internalNotes  String?         @db.Text // Admin/Recruiter only
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  languages           ApplicantLanguage[]
+  educations          Education[]
+  residencyTrainings  ResidencyTraining[]
+  fellowshipTrainings FellowshipTraining[]
+  workExperiences     WorkExperience[]
+  medicalLicenses     MedicalLicense[]
+  boardCertifications BoardCertification[]
+  certifications      ProfessionalCertification[]
+  documents           Document[]
+  preferences         ApplicantPreference?
+
+  applications       Application[]
+  savedOpportunities SavedOpportunity[]
+}
+
+model ApplicantLanguage {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  language    String
+  proficiency LanguageProficiency
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([applicantProfileId, language])
+}
+
+model Education {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  degree         String // e.g., "MBBS", "MD"
+  institution    String
+  country        String
+  graduationDate DateTime?
+  notes          String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ResidencyTraining {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  programName String
+  institution String
+  specialty   String
+  country     String
+  startDate   DateTime?
+  endDate     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FellowshipTraining {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  programName  String
+  institution  String
+  subspecialty String
+  country      String
+  startDate    DateTime?
+  endDate      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkExperience {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  title        String
+  department   String?
+  hospitalName String
+  country      String
+  city         String?
+  startDate    DateTime
+  endDate      DateTime? // null means current
+  isCurrent    Boolean   @default(false)
+  description  String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MedicalLicense {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  issuingAuthority String // e.g., "SCFHS", "DHA"
+  country          String
+  licenseNumber    String?
+  issueDate        DateTime?
+  expiryDate       DateTime?
+  status           String? // e.g., "Active", "Expired"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BoardCertification {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  boardName  String // e.g., "American Board of Internal Medicine"
+  specialty  String
+  country    String
+  issueDate  DateTime?
+  expiryDate DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProfessionalCertification {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  certificationName String // e.g., "ACLS", "BLS"
+  issuingBody       String
+  issueDate         DateTime?
+  expiryDate        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  type             DocumentType
+  title            String? // Human label, e.g. "DHA License 2024"
+  fileName         String
+  fileUrl          String
+  fileSize         Int? // bytes
+  mimeType         String?
+  issuingAuthority String?
+  issueDate        DateTime?
+  expiryDate       DateTime?
+  notes            String?  @db.Text
+  uploadedAt       DateTime @default(now())
+  isVerified       Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ApplicantPreference {
+  id                 String           @id @default(uuid())
+  applicantProfileId String           @unique
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  preferredCountries String[] // Array of GCC countries
+  preferredCities    String[]
+  relocationWilling  Boolean  @default(true)
+  visaSponsorshipReq Boolean  @default(true)
+  expectedSalaryMin  Int?
+  expectedSalaryMax  Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// -----------------------------------------------------------------------------
+// RECRUITER / ADMIN DOMAIN
+// -----------------------------------------------------------------------------
+
+model RecruiterProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  jobTitle   String?
+  department String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignedApps Application[] // Applications managed by this recruiter
+}
+
+// -----------------------------------------------------------------------------
+// HOSPITAL / OPPORTUNITY DOMAIN
+// -----------------------------------------------------------------------------
+
+model HospitalOrganization {
+  id          String  @id @default(uuid())
+  name        String
+  description String? @db.Text
+  website     String?
+  logoUrl     String?
+
+  // Internal management fields
+  type     String? // e.g. "Private Hospital", "Government", "Specialty Center"
+  country  String?
+  city     String?
+  isActive Boolean @default(true)
+  internalNotes String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  locations     HospitalLocation[]
+  contacts      HospitalContact[]
+  departments   Department[]
+  opportunities Opportunity[]
+}
+
+model HospitalLocation {
+  id         String               @id @default(uuid())
+  hospitalId String
+  hospital   HospitalOrganization @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  country   String
+  city      String
+  address   String?
+  isPrimary Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Department {
+  id         String               @id @default(uuid())
+  hospitalId String
+  hospital   HospitalOrganization @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  opportunities Opportunity[]
+}
+
+model HospitalContact {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  hospitalId String
+  hospital   HospitalOrganization @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  jobTitle  String?
+  isPrimary Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Opportunity {
+  id           String               @id @default(uuid())
+  hospitalId   String
+  hospital     HospitalOrganization @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  departmentId String?
+  department   Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
+  title        String
+  specialty    String
+  subspecialty String?
+  seniority    String?   // e.g. "Consultant", "Specialist", "Senior Registrar"
+  country      String
+  city         String?
+
+  employmentType          EmploymentType @default(FULL_TIME)
+  minYearsExperience      Int?
+  minYearsPostSpecialty   Int?
+  boardCertRequired       Boolean        @default(false)
+  salaryRangeMin          Int?
+  salaryRangeMax          Int?
+  currency                String         @default("USD")
+  housingAllowance        Boolean        @default(false)
+  healthInsurance         Boolean        @default(true)
+  annualFlights           Int?           // number of return tickets per year
+  leaveAllowanceDays      Int?
+  benefitsNotes           String?        @db.Text
+  visaSponsorship         Boolean        @default(true)
+  relocationSupport       Boolean        @default(true)
+
+  description          String            @db.Text
+  licensingRequirement String?           @db.Text
+  targetStartDate      DateTime?
+  urgency              String?           @default("STANDARD") // URGENT | STANDARD | PIPELINE
+  internalNotes        String?           @db.Text
+  status               OpportunityStatus @default(INTAKE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  requirements OpportunityRequirement[]
+  benefits     OpportunityBenefit[]
+  applications Application[]
+  savedBy      SavedOpportunity[]
+  conversations Conversation[]
+}
+
+model OpportunityRequirement {
+  id            String      @id @default(uuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  description String
+  isMandatory Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OpportunityBenefit {
+  id            String      @id @default(uuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  description String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SavedOpportunity {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+  opportunityId      String
+  opportunity        Opportunity      @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  savedAt DateTime @default(now())
+
+  @@unique([applicantProfileId, opportunityId])
+}
+
+// -----------------------------------------------------------------------------
+// APPLICATION DOMAIN
+// -----------------------------------------------------------------------------
+
+model Application {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  recruiterId String?
+  recruiter   RecruiterProfile? @relation(fields: [recruiterId], references: [id], onDelete: SetNull)
+
+  status      ApplicationStatus @default(NEW)
+  coverLetter String?           @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  statusHistory ApplicationStatusHistory[]
+  interviews    Interview[]
+  notes         RecruiterNote[]
+  conversations Conversation[]
+
+  @@unique([applicantProfileId, opportunityId])
+}
+
+model ApplicationStatusHistory {
+  id            String      @id @default(uuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  status      ApplicationStatus
+  changedById String? // ID of User who made change
+  reason      String?           @db.Text
+
+  createdAt DateTime @default(now())
+}
+
+model Interview {
+  id            String      @id @default(uuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  round       Int           @default(1)
+  scheduledAt DateTime
+  timezone    String        @default("UTC")
+  type        InterviewType @default(VIRTUAL)
+  meetingLink String?
+  location    String?
+
+  interviewerIds String[] // Comma separated or array of names/IDs
+  notes          String?  @db.Text
+  feedback       String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RecruiterNote {
+  id            String      @id @default(uuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  authorId String // ID of User (Admin/Recruiter)
+  content  String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// -----------------------------------------------------------------------------
+// MESSAGING & NOTIFICATIONS DOMAIN
+// -----------------------------------------------------------------------------
+
+model Conversation {
+  id            String   @id @default(uuid())
+  subject       String?
+  
+  // Optional linkage to an application or opportunity context
+  applicationId String?
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  opportunityId String?
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  messages      Message[]
+  participants  ConversationParticipant[]
+}
+
+model ConversationParticipant {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  hasUnread      Boolean      @default(false)
+  lastReadAt     DateTime?
+
+  joinedAt       DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  
+  content        String       @db.Text
+  
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type        String   // e.g., "MESSAGE_RECEIVED", "APPLICATION_STATUS_UPDATED", "INTERVIEW_SCHEDULED"
+  title       String
+  message     String?  @db.Text
+  
+  isRead      Boolean  @default(false)
+  
+  // Optional linkage for deep linking
+  linkUrl     String?
+  
+  // Entity references for programmatic access if needed
+  entityType  String?
+  entityId    String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
