@@ -4,6 +4,7 @@ import { MessageThread } from "@/features/messaging/components/MessageThread";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { formatParticipantName } from "@/features/messaging/utils";
 
 export default async function ConversationPage({ params }: { params: { id: string } }) {
   const session = await auth();
@@ -15,15 +16,17 @@ export default async function ConversationPage({ params }: { params: { id: strin
     notFound();
   }
 
-  // Mark as read when viewing
+  // Mark as read now that the user has opened the thread
   await markConversationRead(params.id, session.user.id);
 
   const conversation = res.conversation;
   const otherParticipants = conversation.participants
     .filter((p) => p.userId !== session.user.id)
     .map((p) => p.user);
-    
-  const title = conversation.subject || otherParticipants.map(p => `${p.firstName} ${p.lastName}`).join(", ") || "Conversation";
+
+  const title = conversation.subject || otherParticipants.map(formatParticipantName).join(", ") || "Conversation";
+  const currentUserName = session.user.name ?? session.user.email ?? "You";
+  const currentUserRole = session.user.role ?? "";
 
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col bg-card border rounded-lg overflow-hidden">
@@ -40,12 +43,14 @@ export default async function ConversationPage({ params }: { params: { id: strin
           )}
         </div>
       </div>
-      
+
       <div className="flex-1 overflow-hidden">
-        <MessageThread 
-          conversationId={conversation.id} 
-          messages={conversation.messages} 
-          currentUserId={session.user.id} 
+        <MessageThread
+          conversationId={conversation.id}
+          messages={conversation.messages}
+          currentUserId={session.user.id}
+          currentUserName={currentUserName}
+          currentUserRole={currentUserRole}
         />
       </div>
     </div>

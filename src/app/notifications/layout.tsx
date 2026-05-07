@@ -7,6 +7,6 @@ export default async function NotificationsLayout({
   children: React.ReactNode
 }) {
   // Broadly accessible for authenticated users
-  await requireRole(["APPLICANT", "RECRUITER", "ADMIN", "HOSPITAL_CONTACT"])
+  await requireRole(["APPLICANT", "ADMIN", "HOSPITAL_CONTACT"])
   return <AppShell>{children}</AppShell>
 }

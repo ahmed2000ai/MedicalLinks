@@ -7,7 +7,6 @@ import { PersonalDetailsSchema, PersonalDetailsInput } from "../../schemas"
 import { updatePersonalDetails } from "../../actions"
 import { FormSection, FormField } from "@/components/ui/form-section"
 import { Input } from "@/components/ui/input"
-import { Select } from "@/components/ui/select"
 import { WizardFooter } from "../WizardFooter"
 import { FeedbackAlert } from "@/components/ui/feedback"
 
@@ -70,12 +69,16 @@ export function PersonalDetailsStep({ data, onNext }: { data: any; onNext: () =>
             </FormField>
             
             <FormField label="Gender" htmlFor="gender" error={errors.gender?.message}>
-              <Select id="gender" {...register("gender")}>
+              <select 
+                id="gender" 
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                {...register("gender")}
+              >
                 <option value="">Select gender</option>
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
                 <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
-              </Select>
+              </select>
             </FormField>
           </div>
         </FormSection>

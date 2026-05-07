@@ -52,7 +52,7 @@ export default function ComponentsPlayground() {
         <Card>
           <CardHeader>
             <CardTitle>Application Stage Badges</CardTitle>
-            <CardDescription>Maps to the ApplicationStatus enum. Used throughout the recruiter pipeline.</CardDescription>
+            <CardDescription>Maps to the ApplicationStatus enum. Used throughout the application pipeline.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {(["NEW", "SCREENING", "QUALIFIED", "NEEDS_DOCUMENTS", "SHORTLIST_SENT", "INTERVIEWING", "OFFER_STAGE", "ONBOARDING", "HIRED", "REJECTED", "ON_HOLD", "DRAFT", "ARCHIVED"] as const).map(s => (
@@ -163,7 +163,7 @@ export default function ComponentsPlayground() {
       {/* ================================================================
           5. TABLE
       ================================================================ */}
-      <ContentSection title="Table Component" description="Used for dense data lists in recruiter and admin views.">
+      <ContentSection title="Table Component" description="Used for dense data lists in admin and hospital views.">
         <Table>
           <TableHeader>
             <TableRow>
@@ -318,7 +318,7 @@ export default function ComponentsPlayground() {
             <Timeline
               items={[
                 { id: "1", title: "Application Submitted", timestamp: "Oct 20, 2026", status: "success" },
-                { id: "2", title: "Recruiter Screening", description: "Call completed with Sarah Jenkins.", timestamp: "Oct 22, 2026", status: "success" },
+                { id: "2", title: "Admin Screening", description: "Call completed with Sarah Jenkins.", timestamp: "Oct 22, 2026", status: "success" },
                 { id: "3", title: "Hospital Interview", description: "Scheduled with Dept. Head, Al Noor Medical City.", timestamp: "Nov 01, 2026", status: "warning" },
                 { id: "4", title: "Offer Decision", status: "default" },
               ]}
@@ -333,7 +333,7 @@ export default function ComponentsPlayground() {
       <ContentSection title="Feedback Alerts & Empty States">
         <div className="space-y-3">
           <FeedbackAlert type="info" title="Profile Under Review" message="Your credentials are currently being verified by the MedicalLinks team. This typically takes 2–3 business days." />
-          <FeedbackAlert type="success" title="Application Submitted" message="Your application to Al Noor Medical City has been received. You will be contacted by your recruiter within 48 hours." />
+          <FeedbackAlert type="success" title="Application Submitted" message="Your application to Al Noor Medical City has been received. You will be contacted by the hospital team within 48 hours." />
           <FeedbackAlert type="warning" title="Documents Required" message="You need to upload a valid DataFlow report to proceed with your UAE applications." />
           <FeedbackAlert type="error" title="License Expired" message="Your QCHP license has expired. Please renew it before applying to Qatar-based positions." />
         </div>

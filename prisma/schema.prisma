@@ -18,6 +18,26 @@ enum UserRole {
   HOSPITAL_CONTACT
 }
 
+enum HospitalStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  REJECTED
+}
+
+enum ProfileVisibility {
+  VISIBLE
+  HIDDEN
+  ANONYMOUS
+}
+
+enum OpenToOpportunities {
+  ACTIVE
+  SELECTIVE
+  PAUSED
+}
+
 enum Gender {
   MALE
   FEMALE
@@ -54,6 +74,16 @@ enum OpportunityStatus {
   PAUSED
   CLOSED
   FILLED
+}
+
+enum ShortlistStage {
+  SAVED
+  REVIEWING
+  INTERVIEW_INVITED
+  INTERVIEW_COMPLETED
+  OFFER_CONSIDERATION
+  HIRED
+  REJECTED
 }
 
 enum ApplicationStatus {
@@ -93,6 +123,41 @@ enum InterviewType {
   IN_PERSON
 }
 
+enum InterviewInvitationStatus {
+  INVITED
+  ACCEPTED
+  DECLINED
+  RESCHEDULE_REQUESTED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum PlacementStatus {
+  DRAFT          // Hospital has started recording, not yet submitted
+  REPORTED       // Hospital has submitted the placement for admin review
+  CONFIRMED      // Admin has confirmed — fee is commercially valid
+  DISPUTED       // Admin or hospital flagged a discrepancy
+  CANCELLED      // Record voided / hire did not proceed
+}
+
+enum CommercialRecordStatus {
+  DRAFT      // Created but not yet issued to hospital
+  ISSUED     // Invoice sent/issued to hospital
+  PAID       // Payment received
+  OVERDUE    // Past due date
+  WAIVED     // Fee waived by admin
+  DISPUTED   // Invoice under dispute
+  CANCELLED  // Record cancelled
+}
+
+enum PlacementSource {
+  OPPORTUNITY_BASED   // Doctor applied to an opportunity
+  DIRECT_DISCOVERY    // Hospital found doctor via candidate pool
+  SHORTLIST_BASED     // Progressed through hospital shortlist
+  INTERVIEW_BASED     // Progressed from interview invitation
+}
+
 // -----------------------------------------------------------------------------
 // IDENTITY
 // -----------------------------------------------------------------------------
@@ -122,6 +187,8 @@ model User {
   conversations    ConversationParticipant[]
   messages         Message[]
   notifications    Notification[]
+  initiatedInterviews InterviewInvitation[] @relation("InterviewInvitationsInitiated")
+  placementsRecorded  Placement[]           @relation("PlacementsRecorded")
 }
 
 // -----------------------------------------------------------------------------
@@ -149,6 +216,7 @@ model ApplicantProfile {
 
   readinessLabel ReadinessLabel?
   internalNotes  String?         @db.Text // Admin/Recruiter only
+  cvExtractionData Json?         // Raw structured data from AI CV extraction
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -167,6 +235,10 @@ model ApplicantProfile {
 
   applications       Application[]
   savedOpportunities SavedOpportunity[]
+  savedByHospitals   SavedCandidate[]
+  interviewInvitations InterviewInvitation[]
+  placements         Placement[]
+  commercialRecords  CommercialRecord[]
 }
 
 model ApplicantLanguage {
@@ -328,6 +400,12 @@ model ApplicantPreference {
   expectedSalaryMin  Int?
   expectedSalaryMax  Int?
 
+  // Privacy & Visibility
+  visibility          ProfileVisibility @default(VISIBLE)
+  openToOpportunities OpenToOpportunities @default(ACTIVE)
+  hideContactDetails  Boolean @default(true)
+  hideCurrentEmployer Boolean @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -368,13 +446,24 @@ model HospitalOrganization {
   isActive Boolean @default(true)
   internalNotes String? @db.Text
 
+  // Access and Commercial fields
+  status             HospitalStatus @default(PENDING)
+  commissionRate     Float?
+  agreementStartDate DateTime?
+  agreementEndDate   DateTime?
+  agreementNotes     String? @db.Text
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  locations     HospitalLocation[]
-  contacts      HospitalContact[]
-  departments   Department[]
-  opportunities Opportunity[]
+  locations       HospitalLocation[]
+  contacts        HospitalContact[]
+  departments     Department[]
+  opportunities   Opportunity[]
+  savedCandidates SavedCandidate[]
+  interviewInvitations InterviewInvitation[]
+  placements      Placement[]
+  commercialRecords CommercialRecord[]
 }
 
 model HospitalLocation {
@@ -464,6 +553,8 @@ model Opportunity {
   applications Application[]
   savedBy      SavedOpportunity[]
   conversations Conversation[]
+  interviewInvitations InterviewInvitation[]
+  placements   Placement[]
 }
 
 model OpportunityRequirement {
@@ -499,6 +590,24 @@ model SavedOpportunity {
   savedAt DateTime @default(now())
 
   @@unique([applicantProfileId, opportunityId])
+}
+
+/// Hospital saves/favorites a candidate profile for later review.
+/// This acts as the hospital-side candidate pipeline/shortlist.
+model SavedCandidate {
+  id                 String               @id @default(uuid())
+  hospitalId         String
+  hospital           HospitalOrganization @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  applicantProfileId String
+  applicantProfile   ApplicantProfile     @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  stage              ShortlistStage       @default(SAVED)
+  notes              String?              @db.Text
+  
+  savedAt            DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  @@unique([hospitalId, applicantProfileId])
 }
 
 // -----------------------------------------------------------------------------
@@ -569,6 +678,135 @@ model RecruiterNote {
 
   authorId String // ID of User (Admin/Recruiter)
   content  String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Hospital-initiated direct interview invitation (hospital-access model)
+// Separate from the recruiter-led Interview model which is tied to Application.
+model InterviewInvitation {
+  id String @id @default(uuid())
+
+  // Initiating hospital
+  hospitalId        String
+  hospital          HospitalOrganization @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  initiatedByUserId String
+  initiatedBy       User                 @relation("InterviewInvitationsInitiated", fields: [initiatedByUserId], references: [id], onDelete: Cascade)
+
+  // Target doctor
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  // Optional opportunity context
+  opportunityId String?
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+
+  // Interview details
+  title       String
+  scheduledAt DateTime
+  timezone    String        @default("GST") // Gulf Standard Time default
+  type        InterviewType @default(VIRTUAL)
+  location    String?       // Physical address for IN_PERSON
+  meetingLink String?       // Video link for VIRTUAL
+  notes       String?       @db.Text // Agenda / preparation notes
+
+  // Status and doctor response
+  status             InterviewInvitationStatus @default(INVITED)
+  doctorResponseNote String?                   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  placement Placement? // one placement may reference this invitation
+}
+
+// -----------------------------------------------------------------------------
+// PLACEMENT / HIRE ATTRIBUTION DOMAIN
+// -----------------------------------------------------------------------------
+
+/// Records a confirmed hire of a doctor by a hospital through the MedicalLinks platform.
+/// This is the commercial basis for fee calculation and future invoicing.
+model Placement {
+  id String @id @default(uuid())
+
+  // Doctor who was hired
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Restrict)
+
+  // Hospital that made the hire
+  hospitalId String
+  hospital   HospitalOrganization @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+
+  // Hospital contact who recorded the hire (if hospital-initiated)
+  recordedByUserId String?
+  recordedBy       User?   @relation("PlacementsRecorded", fields: [recordedByUserId], references: [id], onDelete: SetNull)
+
+  // Optional context links
+  opportunityId          String?
+  opportunity            Opportunity?          @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  interviewInvitationId  String?               @unique  // one placement per invite max
+  interviewInvitation    InterviewInvitation?  @relation(fields: [interviewInvitationId], references: [id], onDelete: SetNull)
+
+  // Attribution
+  source PlacementSource @default(DIRECT_DISCOVERY)
+
+  // Commercial terms
+  hireDate           DateTime
+  jobTitle           String
+  monthlySalary      Float               // in currency below
+  currency           String   @default("USD")
+  commissionRate     Float               // percentage, e.g. 8.33 = one month salary
+  feeAmount          Float               // calculated: monthlySalary * (commissionRate / 100)
+
+  // Status and admin workflow
+  status PlacementStatus @default(DRAFT)
+  notes  String?         @db.Text
+
+  // Admin confirmation metadata
+  confirmedAt      DateTime?
+  confirmedByUserId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  commercialRecord CommercialRecord? // 1:1 relation to track the commercial/invoice state
+}
+
+// -----------------------------------------------------------------------------
+// COMMERCIAL & INVOICING DOMAIN
+// -----------------------------------------------------------------------------
+
+/// Records the commercial state (invoicing and payment) of a confirmed placement.
+model CommercialRecord {
+  id String @id @default(uuid())
+
+  // The placement this commercial record is tracking (1:1)
+  placementId String @unique
+  placement   Placement @relation(fields: [placementId], references: [id], onDelete: Restrict)
+
+  // Denormalized links for easier querying
+  hospitalId String
+  hospital   HospitalOrganization @relation(fields: [hospitalId], references: [id], onDelete: Restrict)
+
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Restrict)
+
+  // Status
+  status CommercialRecordStatus @default(DRAFT)
+
+  // Snapshot of financial terms (frozen at time of creation)
+  monthlySalary  Float
+  commissionRate Float
+  feeAmount      Float
+  currency       String @default("USD")
+
+  // Invoice / Payment Tracking Dates
+  issueDate   DateTime?
+  dueDate     DateTime?
+  paymentDate DateTime?
+
+  notes String? @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

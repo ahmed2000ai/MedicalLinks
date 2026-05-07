@@ -19,6 +19,25 @@ export async function listConversations(userId: string) {
                     firstName: true,
                     lastName: true,
                     role: true,
+                    applicantProfile: {
+                      select: {
+                        preferences: {
+                          select: {
+                            visibility: true,
+                            hideContactDetails: true,
+                          }
+                        }
+                      }
+                    },
+                    hospitalContact: {
+                      select: {
+                        hospital: {
+                          select: {
+                            name: true,
+                          }
+                        }
+                      }
+                    }
                   },
                 },
               },
@@ -84,7 +103,18 @@ export async function getConversationDetails(conversationId: string, userId: str
         participants: {
           include: {
             user: {
-              select: { id: true, firstName: true, lastName: true, role: true },
+              select: { 
+                id: true, 
+                firstName: true, 
+                lastName: true, 
+                role: true,
+                applicantProfile: {
+                  select: { preferences: { select: { visibility: true, hideContactDetails: true } } }
+                },
+                hospitalContact: {
+                  select: { hospital: { select: { name: true } } }
+                }
+              },
             },
           },
         },
@@ -92,7 +122,18 @@ export async function getConversationDetails(conversationId: string, userId: str
           orderBy: { createdAt: "asc" },
           include: {
             sender: {
-              select: { id: true, firstName: true, lastName: true, role: true },
+              select: { 
+                id: true, 
+                firstName: true, 
+                lastName: true, 
+                role: true,
+                applicantProfile: {
+                  select: { preferences: { select: { visibility: true, hideContactDetails: true } } }
+                },
+                hospitalContact: {
+                  select: { hospital: { select: { name: true } } }
+                }
+              },
             },
           },
         },
@@ -115,13 +156,27 @@ export async function getConversationDetails(conversationId: string, userId: str
 
 export async function sendMessage(conversationId: string, senderId: string, content: string) {
   try {
-    // Ensure sender is a participant
+    // Validate content
+    const trimmed = content.trim();
+    if (!trimmed) return { success: false, error: "Message cannot be empty" };
+    if (trimmed.length > 4000) return { success: false, error: "Message is too long (max 4000 characters)" };
+
+    // Verify role — only doctors (APPLICANT) and hospital contacts (HOSPITAL_CONTACT) may send
+    const sender = await prisma.user.findUnique({
+      where: { id: senderId },
+      select: { role: true },
+    });
+    if (!sender || !["APPLICANT", "HOSPITAL_CONTACT"].includes(sender.role)) {
+      return { success: false, error: "Your account type cannot send messages" };
+    }
+
+    // Ensure sender is a participant in this conversation
     const isParticipant = await prisma.conversationParticipant.findUnique({
       where: { conversationId_userId: { conversationId, userId: senderId } },
     });
 
     if (!isParticipant) {
-      return { success: false, error: "Not a participant" };
+      return { success: false, error: "You are not a participant in this conversation" };
     }
 
     const message = await prisma.message.create({
@@ -243,9 +298,21 @@ export async function markConversationRead(conversationId: string, userId: strin
     });
 
     revalidatePath("/messages", "layout");
+    revalidatePath(`/messages/${conversationId}`);
     return { success: true };
   } catch (error) {
     console.error("Failed to mark conversation read", error);
     return { success: false, error: "Failed to mark as read" };
   }
 }
+
+export async function getUnreadCount(userId: string): Promise<number> {
+  try {
+    return await prisma.conversationParticipant.count({
+      where: { userId, hasUnread: true },
+    });
+  } catch {
+    return 0;
+  }
+}
+

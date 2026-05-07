@@ -1,6 +1,9 @@
+"use client"
+
 import { LockKeyhole } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { signOut } from "next-auth/react"
 
 export default function UnauthorizedPage() {
   return (
@@ -13,11 +16,20 @@ export default function UnauthorizedPage() {
         <p className="text-sm text-slate-500 mb-6">
           You must be logged in to access this secure area. Please sign in with your credentials to continue.
         </p>
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <Link href="/login">
             <Button className="w-full">Sign In</Button>
           </Link>
+          <Button
+            variant="outline"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+          >
+            Sign Out
+          </Button>
         </div>
+        <p className="text-xs text-slate-400 mt-4">
+          If the Sign In button loops back here, click <strong>Sign Out</strong> first to clear your session.
+        </p>
       </div>
     </div>
   )

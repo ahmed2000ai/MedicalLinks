@@ -1,7 +1,7 @@
 "use server"
 
 import { auth } from "@/auth"
-import { PrismaClient, Gender } from "@prisma/client"
+import { PrismaClient, Prisma, Gender } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import {
   PersonalDetailsSchema,
@@ -298,6 +298,37 @@ export async function updatePreferences(data: PreferencesInput) {
     },
   })
 
+  revalidatePath("/profile")
+  return { success: true }
+}
+
+// -----------------------------------------------------------------------------
+// CV Extraction
+// -----------------------------------------------------------------------------
+export async function saveCvExtraction(data: any) {
+  const profileId = await getAuthorizedProfileId()
+  
+  await prisma.applicantProfile.update({
+    where: { id: profileId },
+    data: {
+      cvExtractionData: data
+    }
+  })
+  
+  revalidatePath("/profile")
+  return { success: true }
+}
+
+export async function clearCvExtraction() {
+  const profileId = await getAuthorizedProfileId()
+  
+  await prisma.applicantProfile.update({
+    where: { id: profileId },
+    data: {
+      cvExtractionData: Prisma.JsonNull
+    }
+  })
+  
   revalidatePath("/profile")
   return { success: true }
 }

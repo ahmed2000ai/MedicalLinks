@@ -128,7 +128,7 @@ export function HospitalDetailClient({ hospital }: { hospital: any }) {
         title="Opportunities" 
         description="Roles managed at this hospital."
         actions={
-          <Link href={`/recruiter/opportunities/new?hospitalId=${hospital.id}`}>
+          <Link href={`/admin/opportunities/new?hospitalId=${hospital.id}`}>
             <Button size="sm" className="gap-2"><Plus size={14} /> New Opportunity</Button>
           </Link>
         }
@@ -138,7 +138,7 @@ export function HospitalDetailClient({ hospital }: { hospital: any }) {
         ) : (
           <div className="space-y-3">
             {hospital.opportunities.map((opp: any) => (
-              <Link key={opp.id} href={`/recruiter/opportunities/${opp.id}`}>
+              <Link key={opp.id} href={`/admin/opportunities/${opp.id}`}>
                 <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:border-primary/50 transition-colors bg-card group">
                   <div className="flex items-start gap-4">
                     <div className="p-2.5 bg-primary/10 text-primary rounded-lg shrink-0">

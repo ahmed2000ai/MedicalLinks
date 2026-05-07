@@ -68,7 +68,7 @@ export function OpportunityListClient({ opportunities }: { opportunities: Opport
                 <TableRow 
                   key={o.id} 
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => router.push(`/recruiter/opportunities/${o.id}`)}
+                  onClick={() => router.push(`/admin/opportunities/${o.id}`)}
                 >
                   <TableCell>
                     <div className="font-semibold">{o.title}</div>

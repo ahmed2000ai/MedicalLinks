@@ -18,7 +18,7 @@ export function HeroSection() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
               </span>
-              The GCC&apos;s #1 Medical Recruitment Platform
+              The GCC&apos;s #1 Hospital-Access Platform
             </div>
             
             <h1 className="text-5xl lg:text-[4rem] font-extrabold text-[#041a3a] leading-[1.05] tracking-tight mb-6">

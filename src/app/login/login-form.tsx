@@ -13,6 +13,7 @@ export function LoginForm() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [loginType, setLoginType] = useState<"APPLICANT" | "HOSPITAL">("APPLICANT")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -59,6 +60,32 @@ export function LoginForm() {
               message={error} 
             />
           )}
+
+          {/* Role Selector Segmented Control */}
+          <div className="flex p-1 bg-slate-100 rounded-lg">
+            <button
+              type="button"
+              onClick={() => setLoginType("APPLICANT")}
+              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
+                loginType === "APPLICANT" 
+                  ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200" 
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              Applicant
+            </button>
+            <button
+              type="button"
+              onClick={() => setLoginType("HOSPITAL")}
+              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
+                loginType === "HOSPITAL" 
+                  ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200" 
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              Hospital
+            </button>
+          </div>
           
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none text-slate-700" htmlFor="email">
@@ -71,7 +98,7 @@ export function LoginForm() {
               <Input 
                 id="email" 
                 type="email" 
-                placeholder="doctor@example.com"
+                placeholder={loginType === "APPLICANT" ? "doctor@example.com" : "hospital@example.com"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -123,13 +150,14 @@ export function LoginForm() {
               "Sign In"
             )}
           </Button>
-          
-          <div className="text-center text-sm text-slate-500">
-            Don't have an account?{" "}
-            <a href="#" className="font-medium text-primary hover:text-primary/80 transition-colors">
-              Request access
-            </a>
-          </div>
+          {loginType === "APPLICANT" && (
+            <div className="text-center text-sm text-slate-500">
+              New applicant?{" "}
+              <a href="/register" className="font-medium text-primary hover:text-primary/80 transition-colors">
+                Create an account
+              </a>
+            </div>
+          )}
         </CardFooter>
       </form>
     </Card>

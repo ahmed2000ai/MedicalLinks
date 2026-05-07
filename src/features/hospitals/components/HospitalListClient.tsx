@@ -60,7 +60,7 @@ export function HospitalListClient({ hospitals }: { hospitals: HospitalListItem[
               <TableRow 
                 key={h.id} 
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => router.push(`/recruiter/hospitals/${h.id}`)}
+                onClick={() => router.push(`/admin/hospitals/${h.id}`)}
               >
                 <TableCell>
                   <div className="flex items-center gap-2">

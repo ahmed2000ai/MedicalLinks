@@ -52,7 +52,7 @@ export async function getRecommendedOpportunitiesForApplicant(applicantProfileId
 }
 
 /**
- * Calculates match score for a specific application in the recruiter view.
+ * Calculates match score for a specific application in the admin view.
  */
 export async function getMatchForApplication(applicantProfileId: string, opportunityId: string): Promise<MatchResult | null> {
   const [applicant, opportunity] = await Promise.all([

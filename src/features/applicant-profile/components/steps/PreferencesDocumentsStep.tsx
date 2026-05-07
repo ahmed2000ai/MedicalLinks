@@ -4,7 +4,7 @@ import React, { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { PreferencesSchema, PreferencesInput } from "../../schemas"
-import { updatePreferences } from "../../actions"
+import { updatePreferences, clearCvExtraction } from "../../actions"
 import { FormSection, FormField } from "@/components/ui/form-section"
 import { Input } from "@/components/ui/input"
 import { WizardFooter } from "../WizardFooter"
@@ -40,6 +40,7 @@ export function PreferencesDocumentsStep({ data, onNext, onBack }: { data: any; 
       }
       
       await updatePreferences(formattedValues as PreferencesInput)
+      await clearCvExtraction()
       onNext() // this is the last step, so it redirects to dashboard
     } catch (err: any) {
       setError(err.message || "Failed to save preferences.")

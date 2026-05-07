@@ -75,9 +75,9 @@ export async function checkHasApplied(applicantProfileId: string, opportunityId:
   return !!existing
 }
 
-// ─── Recruiter Side ──────────────────────────────────────────────────────────
+// ─── Admin Side ──────────────────────────────────────────────────────────────
 
-export async function getRecruiterApplications() {
+export async function getAdminApplications() {
   return prisma.application.findMany({
     orderBy: { updatedAt: "desc" },
     include: {
@@ -92,7 +92,7 @@ export async function getRecruiterApplications() {
   })
 }
 
-export async function getRecruiterApplicationDetail(applicationId: string) {
+export async function getAdminApplicationDetail(applicationId: string) {
   return prisma.application.findUnique({
     where: { id: applicationId },
     include: {

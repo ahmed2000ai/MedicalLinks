@@ -21,10 +21,10 @@ export function HospitalForm({ hospital }: { hospital?: any }) {
     startTransition(async () => {
       if (hospital?.id) {
         await updateHospital(hospital.id, formData)
-        router.push(`/recruiter/hospitals/${hospital.id}`)
+        router.push(`/admin/hospitals/${hospital.id}`)
       } else {
         const newId = await createHospital(formData)
-        router.push(`/recruiter/hospitals/${newId}`)
+        router.push(`/admin/hospitals/${newId}`)
       }
     })
   }

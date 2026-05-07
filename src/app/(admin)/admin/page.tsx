@@ -6,8 +6,11 @@ import { PageContainer, ContentSection } from "@/components/ui/layout-system"
 import { FeedbackAlert } from "@/components/ui/feedback"
 import { ShieldCheck, Users, Briefcase, Building, LayoutDashboard, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { getAdminMetrics } from "@/features/dashboard/admin-metrics"
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const metrics = await getAdminMetrics()
+
   return (
     <PageContainer>
       <PageHeader
@@ -23,19 +26,21 @@ export default function AdminPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard title="Total Users"       value="34"  description="All active accounts"   icon={Users}     />
-        <MetricCard title="Open Roles"        value="12"  description="Active opportunities"  icon={Briefcase} />
-        <MetricCard title="Hospital Partners" value="5"   description="Active hospital accounts" icon={Building} />
-        <MetricCard title="System Status"     value="OK"  description="All services nominal"  icon={ShieldCheck} />
+        <MetricCard title="Total Users"       value={metrics.totalUsers.toString()}  description="All active accounts"   icon={Users}     />
+        <MetricCard title="Open Roles"        value={metrics.openOpportunities.toString()}  description="Active opportunities"  icon={Briefcase} />
+        <MetricCard title="Hospital Partners" value={metrics.hospitalPartners.toString()}   description="Active hospital accounts" icon={Building} />
+        <MetricCard title="System Status"     value={metrics.systemStatus}  description="All services nominal"  icon={ShieldCheck} />
       </div>
 
       <ContentSection title="Admin Tools">
         <div className="grid sm:grid-cols-2 gap-4">
           {[
             { title: "Design System", description: "Browse all shared components and UI patterns.", href: "/admin/components", icon: LayoutDashboard },
-            { title: "User Management", description: "Manage recruiter, applicant, and hospital accounts.", href: "#", icon: Users },
-            { title: "Hospital Partners", description: "View and manage connected hospital organizations.", href: "/hospitals", icon: Building },
-            { title: "Opportunities", description: "Review and manage all active job opportunities.", href: "#", icon: Briefcase },
+            { title: "Job Applications", description: "Manage the applicant pipeline.", href: "/admin/applications", icon: Users },
+            { title: "Hospital Partners", description: "View and manage connected hospital organizations.", href: "/admin/hospitals", icon: Building },
+            { title: "Opportunities", description: "Review and manage all active job opportunities.", href: "/admin/opportunities", icon: Briefcase },
+            { title: "Placements", description: "Review and confirm successful hires.", href: "/admin/placements", icon: Users },
+            { title: "Commercial", description: "Track invoicing and payment statuses.", href: "/admin/commercial", icon: LayoutDashboard },
           ].map(({ title, description, href, icon: Icon }) => (
             <Card key={title} className="hover:border-primary/50 transition-colors">
               <CardHeader>

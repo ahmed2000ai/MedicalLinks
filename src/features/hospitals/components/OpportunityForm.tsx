@@ -33,10 +33,10 @@ export function OpportunityForm({ opportunity, hospitals, initialHospitalId }: {
     startTransition(async () => {
       if (opportunity?.id) {
         await updateOpportunity(opportunity.id, formData)
-        router.push(`/recruiter/opportunities/${opportunity.id}`)
+        router.push(`/admin/opportunities/${opportunity.id}`)
       } else {
         const newId = await createOpportunity(formData)
-        router.push(`/recruiter/opportunities/${newId}`)
+        router.push(`/admin/opportunities/${newId}`)
       }
     })
   }

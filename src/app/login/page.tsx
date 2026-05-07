@@ -33,7 +33,7 @@ export default async function LoginPage() {
               Connecting world-class medical professionals with premier healthcare opportunities across the GCC.
             </p>
             <p className="text-lg text-primary-foreground/75">
-              Secure, efficient, and professional recruitment.
+              Secure, efficient, and professional platform access.
             </p>
           </div>
 

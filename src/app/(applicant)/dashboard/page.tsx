@@ -218,7 +218,7 @@ export default async function DashboardPage() {
                 <EmptyState
                   icon={<Calendar className="h-6 w-6 text-muted-foreground" />}
                   title="No Upcoming Interviews"
-                  description="Interviews will appear here once scheduled by your recruiter."
+                  description="Interviews will appear here once a hospital schedules one with you."
                 />
               ) : (
                 <div className="divide-y divide-border -mx-1">
@@ -245,6 +245,7 @@ export default async function DashboardPage() {
                 { label: "Complete Your Profile", href: "/profile",       icon: "👤" },
                 { label: "Browse Open Roles",     href: "/opportunities", icon: "💼" },
                 { label: "My Applications",       href: "/applications",  icon: "📄" },
+                { label: "Interviews",            href: "/interviews",   icon: "🗓️" },
                 { label: "Messages",              href: "/messages",      icon: "✉️" },
               ].map(({ label, href, icon }) => (
                 <Link

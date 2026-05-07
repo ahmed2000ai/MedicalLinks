@@ -3,10 +3,10 @@ import { auth } from "./auth"
 
 const publicRoutes = ["/login", "/register", "/"]
 const roleRoutes = {
-  APPLICANT: ["/dashboard", "/profile", "/applications", "/opportunities", "/messages", "/settings"],
-  RECRUITER: ["/recruiter", "/hospitals", "/messages", "/settings"],
-  ADMIN: ["/admin", "/recruiter", "/hospitals", "/messages", "/settings"],
-  HOSPITAL_CONTACT: ["/hospitals", "/settings"]
+  APPLICANT: ["/dashboard", "/profile", "/documents", "/applications", "/opportunities", "/messages", "/settings"],
+  HOSPITAL_CONTACT: ["/hospitals", "/settings", "/messages"],
+  ADMIN: ["/admin", "/components", "/recruiter", "/hospitals", "/messages", "/settings"],
+  RECRUITER: ["/admin", "/recruiter", "/hospitals", "/messages", "/settings"] // Aliased to Admin
 }
 
 export default auth((req) => {
@@ -22,8 +22,8 @@ export default auth((req) => {
 
   if (isLoggedIn && (nextUrl.pathname === "/login" || nextUrl.pathname === "/")) {
     if (userRole === "APPLICANT") return NextResponse.redirect(new URL("/dashboard", nextUrl))
-    if (userRole === "RECRUITER" || userRole === "ADMIN") return NextResponse.redirect(new URL("/recruiter", nextUrl))
     if (userRole === "HOSPITAL_CONTACT") return NextResponse.redirect(new URL("/hospitals", nextUrl))
+    if (userRole === "ADMIN" || userRole === "RECRUITER") return NextResponse.redirect(new URL("/admin", nextUrl))
     return NextResponse.redirect(new URL("/dashboard", nextUrl))
   }
 

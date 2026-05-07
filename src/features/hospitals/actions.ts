@@ -7,12 +7,12 @@ import { z } from "zod"
 
 const prisma = new PrismaClient()
 
-// ─── Auth guard (RECRUITER or ADMIN) ─────────────────────────────────────────
-async function requireRecruiter() {
+// ─── Auth guard (ADMIN) ────────────────────────────────────────────────────────
+async function requireAdmin() {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
   const role = (session.user as any).role
-  if (role !== "RECRUITER" && role !== "ADMIN") throw new Error("Forbidden")
+  if (role !== "ADMIN") throw new Error("Forbidden")
   return session.user.id
 }
 
@@ -32,7 +32,7 @@ const HospitalSchema = z.object({
 })
 
 export async function createHospital(formData: FormData) {
-  await requireRecruiter()
+  await requireAdmin()
   const data = HospitalSchema.parse(Object.fromEntries(formData))
   const hospital = await prisma.hospitalOrganization.create({
     data: {
@@ -46,12 +46,12 @@ export async function createHospital(formData: FormData) {
       internalNotes: data.internalNotes || null,
     },
   })
-  revalidatePath("/recruiter/hospitals")
+  revalidatePath("/admin/hospitals")
   return hospital.id
 }
 
 export async function updateHospital(hospitalId: string, formData: FormData) {
-  await requireRecruiter()
+  await requireAdmin()
   const data = HospitalSchema.parse(Object.fromEntries(formData))
   await prisma.hospitalOrganization.update({
     where: { id: hospitalId },
@@ -66,14 +66,14 @@ export async function updateHospital(hospitalId: string, formData: FormData) {
       internalNotes: data.internalNotes || null,
     },
   })
-  revalidatePath("/recruiter/hospitals")
-  revalidatePath(`/recruiter/hospitals/${hospitalId}`)
+  revalidatePath("/admin/hospitals")
+  revalidatePath(`/admin/hospitals/${hospitalId}`)
 }
 
 export async function deleteHospital(hospitalId: string) {
-  await requireRecruiter()
+  await requireAdmin()
   await prisma.hospitalOrganization.delete({ where: { id: hospitalId } })
-  revalidatePath("/recruiter/hospitals")
+  revalidatePath("/admin/hospitals")
 }
 
 // ─── Department actions ───────────────────────────────────────────────────────
@@ -84,18 +84,18 @@ const DeptSchema = z.object({
 })
 
 export async function createDepartment(hospitalId: string, formData: FormData) {
-  await requireRecruiter()
+  await requireAdmin()
   const data = DeptSchema.parse(Object.fromEntries(formData))
   await prisma.department.create({
     data: { hospitalId, name: data.name, description: data.description || null },
   })
-  revalidatePath(`/recruiter/hospitals/${hospitalId}`)
+  revalidatePath(`/admin/hospitals/${hospitalId}`)
 }
 
 export async function deleteDepartment(deptId: string, hospitalId: string) {
-  await requireRecruiter()
+  await requireAdmin()
   await prisma.department.delete({ where: { id: deptId } })
-  revalidatePath(`/recruiter/hospitals/${hospitalId}`)
+  revalidatePath(`/admin/hospitals/${hospitalId}`)
 }
 
 // ─── Location actions ─────────────────────────────────────────────────────────
@@ -108,18 +108,18 @@ const LocationSchema = z.object({
 })
 
 export async function createLocation(hospitalId: string, formData: FormData) {
-  await requireRecruiter()
+  await requireAdmin()
   const data = LocationSchema.parse(Object.fromEntries(formData))
   await prisma.hospitalLocation.create({
     data: { hospitalId, country: data.country, city: data.city, address: data.address || null, isPrimary: data.isPrimary ?? false },
   })
-  revalidatePath(`/recruiter/hospitals/${hospitalId}`)
+  revalidatePath(`/admin/hospitals/${hospitalId}`)
 }
 
 export async function deleteLocation(locationId: string, hospitalId: string) {
-  await requireRecruiter()
+  await requireAdmin()
   await prisma.hospitalLocation.delete({ where: { id: locationId } })
-  revalidatePath(`/recruiter/hospitals/${hospitalId}`)
+  revalidatePath(`/admin/hospitals/${hospitalId}`)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -191,61 +191,61 @@ function buildOpportunityData(data: z.infer<typeof OpportunitySchema>) {
 }
 
 export async function createOpportunity(formData: FormData) {
-  await requireRecruiter()
+  await requireAdmin()
   const data = OpportunitySchema.parse(Object.fromEntries(formData))
   const opp = await prisma.opportunity.create({ data: buildOpportunityData(data) })
-  revalidatePath("/recruiter/opportunities")
+  revalidatePath("/admin/opportunities")
   return opp.id
 }
 
 export async function updateOpportunity(opportunityId: string, formData: FormData) {
-  await requireRecruiter()
+  await requireAdmin()
   const data = OpportunitySchema.parse(Object.fromEntries(formData))
   await prisma.opportunity.update({
     where: { id: opportunityId },
     data:  buildOpportunityData(data),
   })
-  revalidatePath("/recruiter/opportunities")
-  revalidatePath(`/recruiter/opportunities/${opportunityId}`)
+  revalidatePath("/admin/opportunities")
+  revalidatePath(`/admin/opportunities/${opportunityId}`)
 }
 
 export async function setOpportunityStatus(opportunityId: string, status: OpportunityStatus) {
-  await requireRecruiter()
+  await requireAdmin()
   await prisma.opportunity.update({ where: { id: opportunityId }, data: { status } })
-  revalidatePath("/recruiter/opportunities")
-  revalidatePath(`/recruiter/opportunities/${opportunityId}`)
+  revalidatePath("/admin/opportunities")
+  revalidatePath(`/admin/opportunities/${opportunityId}`)
 }
 
 export async function deleteOpportunity(opportunityId: string) {
-  await requireRecruiter()
+  await requireAdmin()
   await prisma.opportunity.delete({ where: { id: opportunityId } })
-  revalidatePath("/recruiter/opportunities")
+  revalidatePath("/admin/opportunities")
 }
 
 // ─── Requirement / Benefit helpers ───────────────────────────────────────────
 
 export async function addRequirement(opportunityId: string, description: string, isMandatory: boolean) {
-  await requireRecruiter()
+  await requireAdmin()
   await prisma.opportunityRequirement.create({
     data: { opportunityId, description, isMandatory },
   })
-  revalidatePath(`/recruiter/opportunities/${opportunityId}`)
+  revalidatePath(`/admin/opportunities/${opportunityId}`)
 }
 
 export async function removeRequirement(reqId: string, opportunityId: string) {
-  await requireRecruiter()
+  await requireAdmin()
   await prisma.opportunityRequirement.delete({ where: { id: reqId } })
-  revalidatePath(`/recruiter/opportunities/${opportunityId}`)
+  revalidatePath(`/admin/opportunities/${opportunityId}`)
 }
 
 export async function addBenefit(opportunityId: string, description: string) {
-  await requireRecruiter()
+  await requireAdmin()
   await prisma.opportunityBenefit.create({ data: { opportunityId, description } })
-  revalidatePath(`/recruiter/opportunities/${opportunityId}`)
+  revalidatePath(`/admin/opportunities/${opportunityId}`)
 }
 
 export async function removeBenefit(benefitId: string, opportunityId: string) {
-  await requireRecruiter()
+  await requireAdmin()
   await prisma.opportunityBenefit.delete({ where: { id: benefitId } })
-  revalidatePath(`/recruiter/opportunities/${opportunityId}`)
+  revalidatePath(`/admin/opportunities/${opportunityId}`)
 }

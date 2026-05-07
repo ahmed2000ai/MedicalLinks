@@ -13,7 +13,7 @@ export default async function MessagesPage() {
     <div className="space-y-6">
       <PageHeader 
         title="Messages" 
-        description="Communicate with applicants and recruiters."
+        description="Manage your direct communications and interview scheduling."
       />
       <div className="bg-card border rounded-lg overflow-hidden">
         <ConversationList conversations={conversations} currentUserId={session.user.id} />

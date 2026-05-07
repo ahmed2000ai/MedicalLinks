@@ -1,7 +1,8 @@
 import Link from "next/link"
-import { LayoutDashboard, User, Briefcase, MessagesSquare, Settings, Hospital, ShieldCheck, FileText, FolderOpen } from "lucide-react"
+import { LayoutDashboard, User, Users, Briefcase, MessagesSquare, Settings, Hospital, ShieldCheck, FileText, FolderOpen, CalendarDays, DollarSign } from "lucide-react"
 import { auth } from "@/auth"
 import { NavItem } from "@/components/layout/nav-item"
+import { getUnreadCount } from "@/features/messaging/actions"
 
 export async function Sidebar() {
   const session = await auth()
@@ -9,9 +10,10 @@ export async function Sidebar() {
 
   const role = session?.user?.role
   const isApplicant = role === "APPLICANT"
-  const isRecruiter = role === "RECRUITER" || role === "ADMIN"
   const isAdmin = role === "ADMIN"
   const isHospital = role === "HOSPITAL_CONTACT"
+
+  const unreadCount = session.user.id ? await getUnreadCount(session.user.id) : 0
 
   return (
     <aside className="w-64 bg-sidebar-bg text-sidebar-foreground sticky top-0 h-screen flex flex-col shrink-0 overflow-hidden">
@@ -28,42 +30,36 @@ export async function Sidebar() {
         {isApplicant && (
           <>
             <p className="text-[11px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest px-3 pt-1 pb-2">
-              My Portal
+              Doctor Portal
             </p>
             <NavItem href="/dashboard"     icon={<LayoutDashboard size={18} />} label="Dashboard" />
             <NavItem href="/profile"       icon={<User            size={18} />} label="My Profile" />
             <NavItem href="/documents"     icon={<FolderOpen      size={18} />} label="Documents" />
             <NavItem href="/applications"  icon={<FileText        size={18} />} label="My Applications" />
             <NavItem href="/opportunities" icon={<Briefcase       size={18} />} label="Opportunities" />
-            <NavItem href="/messages"      icon={<MessagesSquare  size={18} />} label="Messages" />
+            <NavItem href="/interviews"    icon={<CalendarDays    size={18} />} label="Interviews" />
+            <NavItem href="/messages"      icon={<MessagesSquare  size={18} />} label="Messages" badge={unreadCount} />
             <NavItem href="/settings"      icon={<Settings        size={18} />} label="Settings" />
           </>
         )}
 
-        {isRecruiter && (
-          <>
-            <p className="text-[11px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest px-3 pt-1 pb-2">
-              Recruitment
-            </p>
-            <NavItem href="/recruiter"  icon={<LayoutDashboard size={18} />} label="Dashboard" />
-            <NavItem href="/recruiter/hospitals"  icon={<Hospital        size={18} />} label="Hospitals" />
-            <NavItem href="/recruiter/opportunities" icon={<Briefcase       size={18} />} label="Opportunities" />
-            <NavItem href="/recruiter/applications"  icon={<FileText        size={18} />} label="Applications" />
-            <NavItem href="/messages"                icon={<MessagesSquare  size={18} />} label="Messages" />
-          </>
-        )}
 
         {isHospital && (
           <>
             <p className="text-[11px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest px-3 pt-1 pb-2">
               Hospital Partner
             </p>
-            <NavItem href="/hospitals" icon={<Hospital  size={18} />} label="Hospital Portal" />
-            <NavItem href="/settings"  icon={<Settings  size={18} />} label="Settings" />
+            <NavItem href="/hospitals" icon={<LayoutDashboard size={18} />} label="Dashboard" />
+            <NavItem href="/hospitals/search" icon={<Users size={18} />} label="Candidate Pool" />
+            <NavItem href="/hospitals/shortlist" icon={<Briefcase size={18} />} label="Shortlist" />
+            <NavItem href="/hospitals/interviews" icon={<CalendarDays size={18} />} label="Interviews" />
+            <NavItem href="/hospitals/placements" icon={<DollarSign size={18} />} label="Placements" />
+            <NavItem href="/messages" icon={<MessagesSquare size={18} />} label="Messages" badge={unreadCount} />
+            <NavItem href="/hospitals/settings"  icon={<Settings  size={18} />} label="Settings" />
           </>
         )}
 
-        {(isAdmin || isRecruiter) && (
+        {isAdmin && (
           <>
             <p className="text-[11px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest px-3 pt-4 pb-2">
               System
@@ -71,7 +67,9 @@ export async function Sidebar() {
             {isAdmin && (
               <>
                 <NavItem href="/admin"            icon={<ShieldCheck     size={18} />} label="Admin Console" />
-                <NavItem href="/admin/components" icon={<LayoutDashboard size={18} />} label="Component Library" />
+                <NavItem href="/admin/hospitals"  icon={<Hospital        size={18} />} label="Hospitals" />
+                <NavItem href="/admin/placements" icon={<DollarSign      size={18} />} label="Placements" />
+                <NavItem href="/admin/commercial" icon={<FileText        size={18} />} label="Commercial / Invoices" />
               </>
             )}
             <NavItem href="/settings" icon={<Settings size={18} />} label="Settings" />

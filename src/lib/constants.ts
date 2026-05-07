@@ -1,8 +1,8 @@
 export const USER_ROLES = {
-  CANDIDATE: "CANDIDATE",
-  RECRUITER: "RECRUITER",
-  HOSPITAL_CONTACT: "HOSPITAL_CONTACT",
+  DOCTOR: "APPLICANT",
+  HOSPITAL_USER: "HOSPITAL_CONTACT",
   ADMIN: "ADMIN",
+  RECRUITER: "RECRUITER", // Deprecated for external workflows
 } as const;
 
 export const APPLICATION_STATUS = {

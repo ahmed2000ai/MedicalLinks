@@ -23,23 +23,6 @@ async function main() {
     },
   });
 
-  const recruiterUser = await prisma.user.upsert({
-    where: { email: 'recruiter@medicallinks.local' },
-    update: { passwordHash },
-    create: {
-      email: 'recruiter@medicallinks.local',
-      passwordHash,
-      firstName: 'Sarah',
-      lastName: 'Jenkins',
-      role: UserRole.RECRUITER,
-      recruiterProfile: {
-        create: {
-          jobTitle: 'Senior Medical Recruiter',
-          department: 'GCC Placements',
-        }
-      }
-    },
-  });
 
   const hospitalPartnerUser = await prisma.user.upsert({
     where: { email: 'hospital@medicallinks.local' },
@@ -96,7 +79,8 @@ async function main() {
           preferences: {
             create: {
               preferredCountries: ['Saudi Arabia', 'United Arab Emirates'],
-              relocationWilling: true
+              relocationWilling: true,
+              visibility: 'VISIBLE'
             }
           }
         }
@@ -107,7 +91,6 @@ async function main() {
   console.log('Test users created. Credentials:');
   console.log('--------------------------------');
   console.log('Applicant: applicant@medicallinks.local / Password123!');
-  console.log('Recruiter: recruiter@medicallinks.local / Password123!');
   console.log('Admin: admin@medicallinks.local / Password123!');
   console.log('Hospital: hospital@medicallinks.local / Password123!');
   console.log('--------------------------------');
@@ -121,6 +104,12 @@ async function main() {
         name: 'Al Noor Medical City',
         description: 'A leading tertiary care hospital in Abu Dhabi, delivering world-class healthcare.',
         website: 'https://example.com/alnoor',
+        status: 'ACTIVE',
+        type: 'Private Hospital',
+        country: 'United Arab Emirates',
+        city: 'Abu Dhabi',
+        agreementStartDate: new Date('2024-01-01'),
+        agreementEndDate: new Date('2025-12-31'),
         locations: {
           create: [
             { country: 'United Arab Emirates', city: 'Abu Dhabi', address: 'Yas Island', isPrimary: true }
@@ -130,6 +119,15 @@ async function main() {
           create: [
             { name: 'Anesthesiology', description: 'Level I Trauma Center' },
             { name: 'Pediatrics', description: 'Advanced Pediatric ICU' }
+          ]
+        },
+        contacts: {
+          create: [
+            {
+              userId: hospitalPartnerUser.id,
+              jobTitle: 'Hospital Administrator',
+              isPrimary: true,
+            }
           ]
         }
       },
@@ -154,6 +152,21 @@ async function main() {
         status: OpportunityStatus.ACTIVE,
       }
     });
+  } else {
+    // Ensure the hospital contact link exists even on re-seed
+    const firstHospital = await prisma.hospitalOrganization.findFirst({ orderBy: { createdAt: 'asc' } });
+    if (firstHospital) {
+      await prisma.hospitalContact.upsert({
+        where: { userId: hospitalPartnerUser.id },
+        update: { hospitalId: firstHospital.id },
+        create: { userId: hospitalPartnerUser.id, hospitalId: firstHospital.id, jobTitle: 'Hospital Administrator', isPrimary: true },
+      });
+      await prisma.hospitalOrganization.update({
+        where: { id: firstHospital.id },
+        data: { status: 'ACTIVE' }
+      });
+      console.log('Created Hospital: Al Noor Medical City and linked Hospital user.');
+    }
   }
 
   console.log('Seed completed successfully!');

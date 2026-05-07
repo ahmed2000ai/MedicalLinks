@@ -3,7 +3,7 @@ import { Users, Globe, ShieldCheck, Target } from "lucide-react"
 export function TrustStrip() {
   const items = [
     { icon: Users, title: "50,000+", subtitle: "Qualified Doctors" },
-    { icon: Globe, title: "100%", subtitle: "GCC-Focused Recruitment" },
+    { icon: Globe, title: "100%", subtitle: "GCC-Focused Hiring" },
     { icon: ShieldCheck, title: "Verified", subtitle: "Credentials Workflow" },
     { icon: Target, title: "Specialty-Based", subtitle: "Smart AI Matching" },
   ]

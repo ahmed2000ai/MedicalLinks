@@ -25,12 +25,10 @@ export function getDefaultRouteForRole(role: string): string {
   switch (role) {
     case "APPLICANT":
       return "/dashboard"
-    case "RECRUITER":
-      return "/recruiter"
-    case "ADMIN":
-      return "/admin"
     case "HOSPITAL_CONTACT":
       return "/hospitals"
+    case "ADMIN":
+      return "/admin"
     default:
       return "/forbidden"
   }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { UserCircle } from "lucide-react";
+import { formatParticipantName } from "@/features/messaging/utils";
 
 export function ConversationList({
   conversations,
@@ -38,7 +39,7 @@ export function ConversationList({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className={`text-base truncate ${isUnread ? "font-bold" : "font-semibold"}`}>
-                    {otherParticipant.firstName} {otherParticipant.lastName}
+                    {formatParticipantName(otherParticipant)}
                     {conv.application?.opportunity && (
                       <span className="text-muted-foreground font-normal ml-2 text-sm">
                         • {conv.application.opportunity.title}
