@@ -17,15 +17,19 @@ export function PersonalDetailsStep({ data, onNext }: { data: any; onNext: () =>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(PersonalDetailsSchema) as any,
     defaultValues: {
-      firstName: data?.user?.firstName || "",
-      lastName: data?.user?.lastName || "",
-      dateOfBirth: data?.profile?.dateOfBirth ? new Date(data.profile.dateOfBirth) : undefined,
-      gender: data?.profile?.gender || "",
-      nationality: data?.profile?.nationality || "",
-      countryOfResidence: data?.profile?.countryOfResidence || "",
-      city: data?.profile?.currentCity || "",
-      phone: data?.user?.phone || "",
-      maritalStatus: data?.profile?.maritalStatus || "", // although maritalStatus is not in Prisma, we leave the field for form compatibility
+      firstName: data?.user?.firstName || data?.profile?.cvExtractionData?.personalInfo?.firstName || "",
+      lastName: data?.user?.lastName || data?.profile?.cvExtractionData?.personalInfo?.lastName || "",
+      dateOfBirth: data?.profile?.dateOfBirth 
+        ? new Date(data.profile.dateOfBirth) 
+        : data?.profile?.cvExtractionData?.personalInfo?.dateOfBirth
+          ? new Date(data.profile.cvExtractionData.personalInfo.dateOfBirth)
+          : undefined,
+      gender: data?.profile?.gender || data?.profile?.cvExtractionData?.personalInfo?.gender || "",
+      nationality: data?.profile?.nationality || data?.profile?.cvExtractionData?.personalInfo?.nationality || "",
+      countryOfResidence: data?.profile?.countryOfResidence || data?.profile?.cvExtractionData?.personalInfo?.countryOfResidence || "",
+      city: data?.profile?.currentCity || data?.profile?.cvExtractionData?.personalInfo?.city || "",
+      phone: data?.user?.phone || data?.profile?.cvExtractionData?.personalInfo?.phone || "",
+      maritalStatus: data?.profile?.maritalStatus || "",
     }
   })
 
@@ -42,7 +46,9 @@ export function PersonalDetailsStep({ data, onNext }: { data: any; onNext: () =>
   // To support Date inputs seamlessly
   const dobStr = data?.profile?.dateOfBirth 
     ? new Date(data.profile.dateOfBirth).toISOString().split("T")[0] 
-    : ""
+    : data?.profile?.cvExtractionData?.personalInfo?.dateOfBirth
+      ? data.profile.cvExtractionData.personalInfo.dateOfBirth
+      : ""
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

@@ -25,7 +25,6 @@ async function getAuthorizedProfileId() {
   return profile.id
 }
 
-export type { PrivacySettingsInput }
 
 export async function getApplicantPrivacySettings() {
   const profileId = await getAuthorizedProfileId()

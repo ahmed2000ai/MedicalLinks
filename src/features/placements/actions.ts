@@ -6,16 +6,7 @@ import { revalidatePath } from "next/cache";
 import { PlacementStatus, PlacementSource } from "@prisma/client";
 import { createCommercialRecordFromPlacement } from "@/features/commercial/actions";
 
-// ---------------------------------------------------------------------------
-// Fee calculation — single source of truth
-// ---------------------------------------------------------------------------
-
-export function calculatePlacementFee(
-  monthlySalary: number,
-  commissionRate: number
-): number {
-  return parseFloat((monthlySalary * (commissionRate / 100)).toFixed(2));
-}
+import { calculatePlacementFee } from "./utils";
 
 // ---------------------------------------------------------------------------
 // Auth helpers

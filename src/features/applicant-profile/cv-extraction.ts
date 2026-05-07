@@ -127,18 +127,18 @@ export async function extractDoctorProfileFromCv(formData: FormData): Promise<Cv
   // 1. Extract text from PDF using pdf2json
   const arrayBuffer = await file.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
-  
+
   const cvText = await new Promise<string>((resolve, reject) => {
-    const pdfParser = new PDFParser(null, 1) // 1 = extract raw text
-    
-    pdfParser.on("pdfParser_dataError", (errData: any) => 
+    const pdfParser = new PDFParser() // 1 = extract raw text
+
+    pdfParser.on("pdfParser_dataError", (errData: any) =>
       reject(new Error(errData.parserError))
     )
-    
+
     pdfParser.on("pdfParser_dataReady", () => {
       resolve(pdfParser.getRawTextContent())
     })
-    
+
     pdfParser.parseBuffer(buffer)
   })
 
