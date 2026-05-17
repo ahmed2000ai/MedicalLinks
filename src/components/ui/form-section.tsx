@@ -103,12 +103,12 @@ export function RepeatableEntry({
 }: RepeatableEntryProps) {
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h4 className="text-sm font-semibold text-foreground">{title}</h4>
           {description && <p className="text-xs text-muted-foreground">{description}</p>}
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={onAdd} className="gap-1.5">
+        <Button type="button" variant="outline" size="sm" onClick={onAdd} className="gap-1.5 w-full sm:w-auto shrink-0">
           <Plus size={14} /> {addLabel}
         </Button>
       </div>

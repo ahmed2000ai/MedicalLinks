@@ -22,16 +22,16 @@ export function NavItem({
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+        "relative flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-2 md:px-3 py-1.5 md:py-2 rounded-md text-[10px] md:text-sm transition-colors shrink-0 min-w-[64px] md:min-w-0",
         isActive
           ? "bg-sidebar-accent text-white font-medium"
           : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-white"
       )}
     >
-      {icon}
-      <span className="flex-1">{label}</span>
+      <div className="shrink-0">{icon}</div>
+      <span className="md:flex-1 text-center md:text-left truncate w-full md:w-auto">{label}</span>
       {badge != null && badge > 0 && (
-        <span className="ml-auto inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-primary text-[11px] font-bold text-white">
+        <span className="absolute top-1 right-1 md:static md:ml-auto inline-flex items-center justify-center h-4 min-w-[16px] md:h-5 md:min-w-[20px] px-1 md:px-1.5 rounded-full bg-primary text-[9px] md:text-[11px] font-bold text-white">
           {badge > 99 ? "99+" : badge}
         </span>
       )}

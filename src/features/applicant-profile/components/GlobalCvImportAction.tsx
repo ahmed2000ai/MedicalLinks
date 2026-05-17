@@ -64,7 +64,7 @@ export function GlobalCvImportAction({ onApplyExtraction }: { onApplyExtraction:
   if (!isOpen) {
     return (
       <div className="mb-6 flex justify-end">
-        <Button variant="outline" onClick={() => setIsOpen(true)} className="gap-2 bg-slate-50 hover:bg-slate-100 border-teal-200 text-teal-800">
+        <Button variant="outline" onClick={() => setIsOpen(true)} className="gap-2 w-full md:w-auto bg-slate-50 hover:bg-slate-100 border-teal-200 text-teal-800">
           <UploadCloud className="w-4 h-4" /> Import CV to Auto-Fill Profile
         </Button>
       </div>
@@ -161,11 +161,11 @@ export function GlobalCvImportAction({ onApplyExtraction }: { onApplyExtraction:
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-border mt-4">
-              <Button type="button" variant="ghost" onClick={() => setExtractionResult(null)}>
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border mt-4">
+              <Button type="button" variant="ghost" onClick={() => setExtractionResult(null)} className="w-full sm:w-auto">
                 Start Over
               </Button>
-              <Button type="button" onClick={handleApply} className="gap-2">
+              <Button type="button" onClick={handleApply} className="gap-2 w-full sm:w-auto">
                 Apply to Profile
               </Button>
             </div>

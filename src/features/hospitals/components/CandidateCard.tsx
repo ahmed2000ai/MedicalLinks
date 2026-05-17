@@ -74,13 +74,13 @@ export function CandidateCard({ candidate, initialSaved = false }: CandidateCard
             </div>
           </div>
 
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap md:flex-nowrap gap-2 shrink-0 mt-2 md:mt-0">
             <MessageDoctorButton applicantProfileId={candidate.id} />
             <SaveCandidateButton
               applicantProfileId={candidate.id}
               initialSaved={initialSaved}
             />
-            <Button size="sm" asChild>
+            <Button size="sm" asChild className="w-full sm:w-auto">
               <Link href={`/hospitals/candidates/${candidate.id}`}>
                 View Profile
               </Link>

@@ -19,7 +19,7 @@ export function ProfileSectionTabNav({ tabs, activeTab, onTabChange }: ProfileSe
   const activeIndex = tabs.findIndex((t) => t.id === activeTab)
 
   return (
-    <nav className="flex flex-col gap-1 p-3">
+    <nav className="flex flex-row md:flex-col gap-2 md:gap-1 p-3 overflow-x-auto md:overflow-visible hide-scrollbar pb-3">
       {tabs.map((tab, index) => {
         const isActive = activeTab === tab.id
         const isPast = index < activeIndex
@@ -30,7 +30,7 @@ export function ProfileSectionTabNav({ tabs, activeTab, onTabChange }: ProfileSe
             type="button"
             onClick={() => onTabChange(tab.id)}
             className={[
-              "group flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-lg transition-all duration-150",
+              "group flex items-center gap-2 md:gap-3 shrink-0 md:w-full text-left px-3 py-2 md:py-2.5 rounded-lg transition-all duration-150",
               isActive
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : tab.hasErrors
@@ -61,10 +61,10 @@ export function ProfileSectionTabNav({ tabs, activeTab, onTabChange }: ProfileSe
             </span>
 
             {/* Label */}
-            <span className="text-sm font-medium flex-1 leading-snug">{tab.title}</span>
+            <span className="text-sm font-medium flex-1 whitespace-nowrap leading-snug">{tab.title}</span>
 
             {/* Active indicator chevron */}
-            {isActive && <ChevronRight className="w-4 h-4 shrink-0 opacity-70" />}
+            {isActive && <ChevronRight className="hidden md:block w-4 h-4 shrink-0 opacity-70" />}
 
             {/* Error dot */}
             {tab.hasErrors && !isActive && (

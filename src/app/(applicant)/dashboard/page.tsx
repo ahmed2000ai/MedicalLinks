@@ -80,8 +80,8 @@ export default async function DashboardPage() {
             Here&rsquo;s what&rsquo;s happening with your applications today.
           </p>
         </div>
-        <Link href="/opportunities">
-          <Button className="gap-2 shrink-0">
+        <Link href="/opportunities" className="w-full sm:w-auto">
+          <Button className="gap-2 w-full sm:w-auto shrink-0">
             <Briefcase size={16} /> Browse Opportunities
           </Button>
         </Link>

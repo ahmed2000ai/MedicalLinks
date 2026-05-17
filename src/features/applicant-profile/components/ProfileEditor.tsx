@@ -284,11 +284,11 @@ export function ProfileEditor({ initialData }: { initialData: any }) {
       <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit, onError)} id="profile-form">
-            <div className="flex min-h-[600px]">
+            <div className="flex flex-col md:flex-row min-h-[600px]">
 
               {/* ── Sidebar nav ── */}
-              <aside className="w-56 shrink-0 border-r border-border bg-slate-50/70 flex flex-col">
-                <div className="px-4 pt-5 pb-3">
+              <aside className="w-full md:w-56 shrink-0 border-b md:border-b-0 md:border-r border-border bg-slate-50/70 flex flex-col">
+                <div className="hidden md:block px-4 pt-5 pb-3">
                   <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
                     Profile Sections
                   </p>
@@ -300,7 +300,7 @@ export function ProfileEditor({ initialData }: { initialData: any }) {
                     onTabChange={setActiveTab}
                   />
                 </div>
-                <div className="p-4 border-t border-border">
+                <div className="hidden md:block p-4 border-t border-border">
                   <p className="text-[11px] text-slate-400 text-center">
                     {activeIndex + 1} of {tabConfigs.length} sections
                   </p>
@@ -328,29 +328,29 @@ export function ProfileEditor({ initialData }: { initialData: any }) {
                 </div>
 
                 {/* Footer bar */}
-                <div className="px-6 py-4 border-t border-border bg-slate-50/50 flex items-center gap-3">
+                <div className="px-4 md:px-6 py-4 border-t border-border bg-slate-50/50 flex flex-wrap md:flex-nowrap items-center gap-3">
                   {/* Prev / Next */}
                   <button
                     type="button"
                     disabled={!canGoPrev}
                     onClick={() => setActiveTab(tabConfigs[activeIndex - 1].id)}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors px-3 py-2 rounded-lg hover:bg-slate-100"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors px-2 md:px-3 py-2 rounded-lg hover:bg-slate-100"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                    Previous
+                    <span className="hidden sm:inline">Previous</span>
                   </button>
 
                   <button
                     type="button"
                     disabled={!canGoNext}
                     onClick={() => setActiveTab(tabConfigs[activeIndex + 1].id)}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors px-3 py-2 rounded-lg hover:bg-slate-100"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors px-2 md:px-3 py-2 rounded-lg hover:bg-slate-100"
                   >
-                    Next
+                    <span className="hidden sm:inline">Next</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                   </button>
 
-                  <div className="flex-1" />
+                  <div className="flex-1 min-w-[20px]" />
 
                   {Object.keys(errors).length > 0 && (
                     <p className="text-xs text-destructive font-medium hidden md:block">
@@ -358,7 +358,7 @@ export function ProfileEditor({ initialData }: { initialData: any }) {
                     </p>
                   )}
 
-                  <Button type="submit" disabled={isSubmitting} className="gap-2 min-w-[180px]">
+                  <Button type="submit" disabled={isSubmitting} className="gap-2 w-full sm:w-auto min-w-[140px] md:min-w-[180px]">
                     {isSubmitting ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
                     ) : (

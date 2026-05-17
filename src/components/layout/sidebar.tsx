@@ -16,9 +16,9 @@ export async function Sidebar() {
   const unreadCount = session.user.id ? await getUnreadCount(session.user.id) : 0
 
   return (
-    <aside className="w-64 bg-sidebar-bg text-sidebar-foreground sticky top-0 h-screen flex flex-col shrink-0 overflow-hidden">
+    <aside className="w-full md:w-64 bg-sidebar-bg text-sidebar-foreground sticky bottom-0 md:top-0 h-16 md:h-screen flex flex-row md:flex-col shrink-0 overflow-hidden z-50">
       {/* Logo */}
-      <div className="h-16 flex items-center px-6 border-b border-sidebar-accent shrink-0">
+      <div className="hidden md:flex h-16 items-center px-6 border-b border-sidebar-accent shrink-0">
         <Link href="/" className="text-xl font-bold text-white flex items-center gap-2 hover:opacity-90 transition-opacity">
           <span className="text-primary text-2xl font-black">+</span>
           Medical<span className="text-primary">Links</span>
@@ -26,10 +26,10 @@ export async function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-4 px-4 space-y-1">
+      <nav className="flex-1 flex flex-row md:flex-col overflow-x-auto md:overflow-y-auto py-2 md:py-4 px-2 md:px-4 space-x-1 md:space-x-0 md:space-y-1 hide-scrollbar items-center md:items-stretch">
         {isApplicant && (
           <>
-            <p className="text-[11px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest px-3 pt-1 pb-2">
+            <p className="hidden md:block text-[11px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest px-3 pt-1 pb-2">
               Doctor Portal
             </p>
             <NavItem href="/dashboard"     icon={<LayoutDashboard size={18} />} label="Dashboard" />
@@ -46,7 +46,7 @@ export async function Sidebar() {
 
         {isHospital && (
           <>
-            <p className="text-[11px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest px-3 pt-1 pb-2">
+            <p className="hidden md:block text-[11px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest px-3 pt-1 pb-2">
               Hospital Partner
             </p>
             <NavItem href="/hospitals" icon={<LayoutDashboard size={18} />} label="Dashboard" />
@@ -61,7 +61,7 @@ export async function Sidebar() {
 
         {isAdmin && (
           <>
-            <p className="text-[11px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest px-3 pt-4 pb-2">
+            <p className="hidden md:block text-[11px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest px-3 pt-4 pb-2">
               System
             </p>
             {isAdmin && (
@@ -78,7 +78,7 @@ export async function Sidebar() {
       </nav>
 
       {/* Footer — GCC tagline (matches UI1 sidebar bottom) */}
-      <div className="shrink-0 m-4 rounded-xl bg-sidebar-accent/70 p-4 border border-white/5">
+      <div className="hidden md:block shrink-0 m-4 rounded-xl bg-sidebar-accent/70 p-4 border border-white/5">
         {/* Skyline SVG illustration */}
         <svg viewBox="0 0 220 48" className="w-full h-8 mb-2 opacity-30" fill="currentColor">
           <rect x="0"   y="30" width="8"  height="18" rx="1"/>

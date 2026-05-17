@@ -93,14 +93,15 @@ export function DocumentRow({ doc, onDeleted }: DocumentRowProps) {
     <div className={`border border-border rounded-xl p-4 bg-white hover:shadow-sm transition-shadow ${isWorking ? "opacity-60" : ""}`}>
       {error && <FeedbackAlert type="error" message={error} className="mb-3" />}
 
-      <div className="flex items-start gap-4">
-        {/* Icon */}
-        <div className="p-2.5 bg-primary/8 rounded-lg shrink-0">
-          <FileText className="h-5 w-5 text-primary" />
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div className="flex items-start gap-4 flex-1 min-w-0">
+          {/* Icon */}
+          <div className="p-2.5 bg-primary/8 rounded-lg shrink-0">
+            <FileText className="h-5 w-5 text-primary" />
+          </div>
 
-        {/* Main info */}
-        <div className="flex-1 min-w-0">
+          {/* Main info */}
+          <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
               {DOCUMENT_TYPE_LABELS[doc.type]}
@@ -144,9 +145,10 @@ export function DocumentRow({ doc, onDeleted }: DocumentRowProps) {
             <p className="text-xs text-muted-foreground mt-1 italic">{doc.notes}</p>
           )}
         </div>
+        </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1 shrink-0 sm:self-start w-full sm:w-auto justify-end border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0 mt-1 sm:mt-0">
           <a
             href={doc.fileUrl}
             target="_blank"

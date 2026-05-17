@@ -94,7 +94,7 @@ export function CandidateFilters() {
   }
 
   return (
-    <div className="bg-white border rounded-xl p-5 space-y-5 sticky top-6">
+    <div className="bg-white border rounded-xl p-5 space-y-5 lg:sticky lg:top-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="h-4 w-4 text-slate-500" />
