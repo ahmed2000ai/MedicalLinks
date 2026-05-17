@@ -19,7 +19,7 @@ export function ProfileSectionTabNav({ tabs, activeTab, onTabChange }: ProfileSe
   const activeIndex = tabs.findIndex((t) => t.id === activeTab)
 
   return (
-    <nav className="flex flex-row md:flex-col gap-2 md:gap-1 p-3 overflow-x-auto md:overflow-visible hide-scrollbar pb-3">
+    <nav className="flex flex-row md:flex-col gap-2 md:gap-1 p-3 overflow-x-auto overflow-y-hidden md:overflow-x-hidden md:overflow-y-auto hide-scrollbar pb-3 touch-pan-x md:touch-auto overscroll-x-contain">
       {tabs.map((tab, index) => {
         const isActive = activeTab === tab.id
         const isPast = index < activeIndex

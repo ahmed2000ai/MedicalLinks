@@ -26,7 +26,7 @@ export async function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 flex flex-row md:flex-col overflow-x-auto md:overflow-y-auto py-2 md:py-4 px-2 md:px-4 space-x-1 md:space-x-0 md:space-y-1 hide-scrollbar items-center md:items-stretch">
+      <nav className="flex-1 flex flex-row md:flex-col overflow-x-auto overflow-y-hidden md:overflow-x-hidden md:overflow-y-auto py-2 md:py-4 px-2 md:px-4 space-x-1 md:space-x-0 md:space-y-1 hide-scrollbar items-center md:items-stretch touch-pan-x md:touch-auto overscroll-x-contain">
         {isApplicant && (
           <>
             <p className="hidden md:block text-[11px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest px-3 pt-1 pb-2">
