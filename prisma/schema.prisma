@@ -134,28 +134,28 @@ enum InterviewInvitationStatus {
 }
 
 enum PlacementStatus {
-  DRAFT          // Hospital has started recording, not yet submitted
-  REPORTED       // Hospital has submitted the placement for admin review
-  CONFIRMED      // Admin has confirmed — fee is commercially valid
-  DISPUTED       // Admin or hospital flagged a discrepancy
-  CANCELLED      // Record voided / hire did not proceed
+  DRAFT // Hospital has started recording, not yet submitted
+  REPORTED // Hospital has submitted the placement for admin review
+  CONFIRMED // Admin has confirmed — fee is commercially valid
+  DISPUTED // Admin or hospital flagged a discrepancy
+  CANCELLED // Record voided / hire did not proceed
 }
 
 enum CommercialRecordStatus {
-  DRAFT      // Created but not yet issued to hospital
-  ISSUED     // Invoice sent/issued to hospital
-  PAID       // Payment received
-  OVERDUE    // Past due date
-  WAIVED     // Fee waived by admin
-  DISPUTED   // Invoice under dispute
-  CANCELLED  // Record cancelled
+  DRAFT // Created but not yet issued to hospital
+  ISSUED // Invoice sent/issued to hospital
+  PAID // Payment received
+  OVERDUE // Past due date
+  WAIVED // Fee waived by admin
+  DISPUTED // Invoice under dispute
+  CANCELLED // Record cancelled
 }
 
 enum PlacementSource {
-  OPPORTUNITY_BASED   // Doctor applied to an opportunity
-  DIRECT_DISCOVERY    // Hospital found doctor via candidate pool
-  SHORTLIST_BASED     // Progressed through hospital shortlist
-  INTERVIEW_BASED     // Progressed from interview invitation
+  OPPORTUNITY_BASED // Doctor applied to an opportunity
+  DIRECT_DISCOVERY // Hospital found doctor via candidate pool
+  SHORTLIST_BASED // Progressed through hospital shortlist
+  INTERVIEW_BASED // Progressed from interview invitation
 }
 
 // -----------------------------------------------------------------------------
@@ -184,11 +184,11 @@ model User {
   hospitalContact  HospitalContact?
 
   // Communication relations
-  conversations    ConversationParticipant[]
-  messages         Message[]
-  notifications    Notification[]
-  initiatedInterviews InterviewInvitation[] @relation("InterviewInvitationsInitiated")
-  placementsRecorded  Placement[]           @relation("PlacementsRecorded")
+  conversations       ConversationParticipant[]
+  messages            Message[]
+  notifications       Notification[]
+  initiatedInterviews InterviewInvitation[]     @relation("InterviewInvitationsInitiated")
+  placementsRecorded  Placement[]               @relation("PlacementsRecorded")
 }
 
 // -----------------------------------------------------------------------------
@@ -206,17 +206,21 @@ model ApplicantProfile {
   countryOfResidence String?
   currentCity        String?
 
+  headline             String?
+  careerObjective      String? @db.Text
   professionalSummary  String? @db.Text
   totalYearsExperience Int?
   postSpecialtyExp     Int?
+  specialty            String?
+  subspecialty         String?
 
   currentEmployer  String?
   currentJobTitle  String?
   noticePeriodDays Int?
 
-  readinessLabel ReadinessLabel?
-  internalNotes  String?         @db.Text // Admin/Recruiter only
-  cvExtractionData Json?         // Raw structured data from AI CV extraction
+  readinessLabel   ReadinessLabel?
+  internalNotes    String?         @db.Text // Admin/Recruiter only
+  cvExtractionData Json? // Raw structured data from AI CV extraction
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -230,15 +234,25 @@ model ApplicantProfile {
   medicalLicenses     MedicalLicense[]
   boardCertifications BoardCertification[]
   certifications      ProfessionalCertification[]
+  clinicalProcedures  ClinicalProcedure[]
+  trainingCourses     TrainingCourse[]
+  publications        Publication[]
+  presentations       ConferencePresentation[]
+  teachingRoles       TeachingExperience[]
+  qiProjects          QualityImprovement[]
+  leadershipRoles     LeadershipRole[]
+  awards              Award[]
+  memberships         ProfessionalMembership[]
+  referees            Referee[]
   documents           Document[]
   preferences         ApplicantPreference?
 
-  applications       Application[]
-  savedOpportunities SavedOpportunity[]
-  savedByHospitals   SavedCandidate[]
+  applications         Application[]
+  savedOpportunities   SavedOpportunity[]
+  savedByHospitals     SavedCandidate[]
   interviewInvitations InterviewInvitation[]
-  placements         Placement[]
-  commercialRecords  CommercialRecord[]
+  placements           Placement[]
+  commercialRecords    CommercialRecord[]
 }
 
 model ApplicantLanguage {
@@ -246,8 +260,12 @@ model ApplicantLanguage {
   applicantProfileId String
   applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
 
-  language    String
-  proficiency LanguageProficiency
+  language           String
+  proficiency        LanguageProficiency
+  spokenProficiency  String?
+  writtenProficiency String?
+  readingProficiency String?
+  notes              String?             @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -260,11 +278,14 @@ model Education {
   applicantProfileId String
   applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
 
-  degree         String // e.g., "MBBS", "MD"
-  institution    String
-  country        String
-  graduationDate DateTime?
-  notes          String?   @db.Text
+  degree            String // e.g., "MBBS", "MD"
+  qualificationType String? // e.g., "Medical Degree", "Postgraduate Diploma"
+  field             String? // e.g., "Medicine and Surgery"
+  institution       String
+  country           String
+  graduationDate    DateTime?
+  distinction       String?
+  notes             String?   @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -281,6 +302,8 @@ model ResidencyTraining {
   country     String
   startDate   DateTime?
   endDate     DateTime?
+  award       String?
+  notes       String?   @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -297,6 +320,8 @@ model FellowshipTraining {
   country      String
   startDate    DateTime?
   endDate      DateTime?
+  award        String?
+  notes        String?   @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -307,15 +332,19 @@ model WorkExperience {
   applicantProfileId String
   applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
 
-  title        String
-  department   String?
-  hospitalName String
-  country      String
-  city         String?
-  startDate    DateTime
-  endDate      DateTime? // null means current
-  isCurrent    Boolean   @default(false)
-  description  String?   @db.Text
+  title               String
+  department          String?
+  specialty           String?
+  hospitalName        String
+  country             String
+  city                String?
+  startDate           DateTime
+  endDate             DateTime? // null means current
+  isCurrent           Boolean   @default(false)
+  description         String?   @db.Text
+  achievementsSummary String?   @db.Text
+  metrics             String?   @db.Text
+  clinicalVolume      String?   @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -380,9 +409,177 @@ model Document {
   issuingAuthority String?
   issueDate        DateTime?
   expiryDate       DateTime?
-  notes            String?  @db.Text
-  uploadedAt       DateTime @default(now())
-  isVerified       Boolean  @default(false)
+  notes            String?      @db.Text
+  uploadedAt       DateTime     @default(now())
+  isVerified       Boolean      @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClinicalProcedure {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  procedureName   String
+  category        String?
+  experienceLevel String?
+  volume          Int?
+  notes           String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TrainingCourse {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  title               String
+  provider            String?
+  location            String?
+  startDate           DateTime?
+  endDate             DateTime?
+  certificateReceived Boolean   @default(false)
+  notes               String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Publication {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  title           String
+  authors         String?
+  journal         String?
+  year            Int?
+  volume          String?
+  doi             String?
+  pmid            String?
+  publicationType String?
+  notes           String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ConferencePresentation {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  title            String
+  conferenceName   String?
+  location         String?
+  year             Int?
+  presentationType String?
+  notes            String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TeachingExperience {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  roleTitle    String
+  audienceType String?
+  institution  String?
+  subjectArea  String?
+  format       String?
+  startDate    DateTime?
+  endDate      DateTime?
+  notes        String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QualityImprovement {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  projectTitle String
+  category     String?
+  institution  String?
+  year         Int?
+  summary      String? @db.Text
+  role         String?
+  outcome      String? @db.Text
+  notes        String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeadershipRole {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  roleTitle        String
+  organization     String?
+  category         String?
+  startDate        DateTime?
+  endDate          DateTime?
+  responsibilities String?   @db.Text
+  notes            String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Award {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  title                String
+  awardingOrganization String?
+  year                 Int?
+  description          String? @db.Text
+  category             String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProfessionalMembership {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  organization     String
+  membershipType   String?
+  membershipNumber String?
+  startDate        DateTime?
+  endDate          DateTime?
+  notes            String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Referee {
+  id                 String           @id @default(uuid())
+  applicantProfileId String
+  applicantProfile   ApplicantProfile @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
+
+  fullName     String
+  title        String?
+  relationship String?
+  institution  String?
+  email        String?
+  phone        String?
+  notes        String? @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -401,10 +598,10 @@ model ApplicantPreference {
   expectedSalaryMax  Int?
 
   // Privacy & Visibility
-  visibility          ProfileVisibility @default(VISIBLE)
+  visibility          ProfileVisibility   @default(VISIBLE)
   openToOpportunities OpenToOpportunities @default(ACTIVE)
-  hideContactDetails  Boolean @default(true)
-  hideCurrentEmployer Boolean @default(true)
+  hideContactDetails  Boolean             @default(true)
+  hideCurrentEmployer Boolean             @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -440,10 +637,10 @@ model HospitalOrganization {
   logoUrl     String?
 
   // Internal management fields
-  type     String? // e.g. "Private Hospital", "Government", "Specialty Center"
-  country  String?
-  city     String?
-  isActive Boolean @default(true)
+  type          String? // e.g. "Private Hospital", "Government", "Specialty Center"
+  country       String?
+  city          String?
+  isActive      Boolean @default(true)
   internalNotes String? @db.Text
 
   // Access and Commercial fields
@@ -451,19 +648,19 @@ model HospitalOrganization {
   commissionRate     Float?
   agreementStartDate DateTime?
   agreementEndDate   DateTime?
-  agreementNotes     String? @db.Text
+  agreementNotes     String?        @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  locations       HospitalLocation[]
-  contacts        HospitalContact[]
-  departments     Department[]
-  opportunities   Opportunity[]
-  savedCandidates SavedCandidate[]
+  locations            HospitalLocation[]
+  contacts             HospitalContact[]
+  departments          Department[]
+  opportunities        Opportunity[]
+  savedCandidates      SavedCandidate[]
   interviewInvitations InterviewInvitation[]
-  placements      Placement[]
-  commercialRecords CommercialRecord[]
+  placements           Placement[]
+  commercialRecords    CommercialRecord[]
 }
 
 model HospitalLocation {
@@ -519,24 +716,24 @@ model Opportunity {
   title        String
   specialty    String
   subspecialty String?
-  seniority    String?   // e.g. "Consultant", "Specialist", "Senior Registrar"
+  seniority    String? // e.g. "Consultant", "Specialist", "Senior Registrar"
   country      String
   city         String?
 
-  employmentType          EmploymentType @default(FULL_TIME)
-  minYearsExperience      Int?
-  minYearsPostSpecialty   Int?
-  boardCertRequired       Boolean        @default(false)
-  salaryRangeMin          Int?
-  salaryRangeMax          Int?
-  currency                String         @default("USD")
-  housingAllowance        Boolean        @default(false)
-  healthInsurance         Boolean        @default(true)
-  annualFlights           Int?           // number of return tickets per year
-  leaveAllowanceDays      Int?
-  benefitsNotes           String?        @db.Text
-  visaSponsorship         Boolean        @default(true)
-  relocationSupport       Boolean        @default(true)
+  employmentType        EmploymentType @default(FULL_TIME)
+  minYearsExperience    Int?
+  minYearsPostSpecialty Int?
+  boardCertRequired     Boolean        @default(false)
+  salaryRangeMin        Int?
+  salaryRangeMax        Int?
+  currency              String         @default("USD")
+  housingAllowance      Boolean        @default(false)
+  healthInsurance       Boolean        @default(true)
+  annualFlights         Int? // number of return tickets per year
+  leaveAllowanceDays    Int?
+  benefitsNotes         String?        @db.Text
+  visaSponsorship       Boolean        @default(true)
+  relocationSupport     Boolean        @default(true)
 
   description          String            @db.Text
   licensingRequirement String?           @db.Text
@@ -548,13 +745,13 @@ model Opportunity {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  requirements OpportunityRequirement[]
-  benefits     OpportunityBenefit[]
-  applications Application[]
-  savedBy      SavedOpportunity[]
-  conversations Conversation[]
+  requirements         OpportunityRequirement[]
+  benefits             OpportunityBenefit[]
+  applications         Application[]
+  savedBy              SavedOpportunity[]
+  conversations        Conversation[]
   interviewInvitations InterviewInvitation[]
-  placements   Placement[]
+  placements           Placement[]
 }
 
 model OpportunityRequirement {
@@ -601,11 +798,11 @@ model SavedCandidate {
   applicantProfileId String
   applicantProfile   ApplicantProfile     @relation(fields: [applicantProfileId], references: [id], onDelete: Cascade)
 
-  stage              ShortlistStage       @default(SAVED)
-  notes              String?              @db.Text
-  
-  savedAt            DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
+  stage ShortlistStage @default(SAVED)
+  notes String?        @db.Text
+
+  savedAt   DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([hospitalId, applicantProfileId])
 }
@@ -707,8 +904,8 @@ model InterviewInvitation {
   scheduledAt DateTime
   timezone    String        @default("GST") // Gulf Standard Time default
   type        InterviewType @default(VIRTUAL)
-  location    String?       // Physical address for IN_PERSON
-  meetingLink String?       // Video link for VIRTUAL
+  location    String? // Physical address for IN_PERSON
+  meetingLink String? // Video link for VIRTUAL
   notes       String?       @db.Text // Agenda / preparation notes
 
   // Status and doctor response
@@ -743,28 +940,28 @@ model Placement {
   recordedBy       User?   @relation("PlacementsRecorded", fields: [recordedByUserId], references: [id], onDelete: SetNull)
 
   // Optional context links
-  opportunityId          String?
-  opportunity            Opportunity?          @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
-  interviewInvitationId  String?               @unique  // one placement per invite max
-  interviewInvitation    InterviewInvitation?  @relation(fields: [interviewInvitationId], references: [id], onDelete: SetNull)
+  opportunityId         String?
+  opportunity           Opportunity?         @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  interviewInvitationId String?              @unique // one placement per invite max
+  interviewInvitation   InterviewInvitation? @relation(fields: [interviewInvitationId], references: [id], onDelete: SetNull)
 
   // Attribution
   source PlacementSource @default(DIRECT_DISCOVERY)
 
   // Commercial terms
-  hireDate           DateTime
-  jobTitle           String
-  monthlySalary      Float               // in currency below
-  currency           String   @default("USD")
-  commissionRate     Float               // percentage, e.g. 8.33 = one month salary
-  feeAmount          Float               // calculated: monthlySalary * (commissionRate / 100)
+  hireDate       DateTime
+  jobTitle       String
+  monthlySalary  Float // in currency below
+  currency       String   @default("USD")
+  commissionRate Float // percentage, e.g. 8.33 = one month salary
+  feeAmount      Float // calculated: monthlySalary * (commissionRate / 100)
 
   // Status and admin workflow
   status PlacementStatus @default(DRAFT)
   notes  String?         @db.Text
 
   // Admin confirmation metadata
-  confirmedAt      DateTime?
+  confirmedAt       DateTime?
   confirmedByUserId String?
 
   createdAt DateTime @default(now())
@@ -782,7 +979,7 @@ model CommercialRecord {
   id String @id @default(uuid())
 
   // The placement this commercial record is tracking (1:1)
-  placementId String @unique
+  placementId String    @unique
   placement   Placement @relation(fields: [placementId], references: [id], onDelete: Restrict)
 
   // Denormalized links for easier querying
@@ -817,20 +1014,20 @@ model CommercialRecord {
 // -----------------------------------------------------------------------------
 
 model Conversation {
-  id            String   @id @default(uuid())
-  subject       String?
-  
+  id      String  @id @default(uuid())
+  subject String?
+
   // Optional linkage to an application or opportunity context
   applicationId String?
   application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
   opportunityId String?
   opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  messages      Message[]
-  participants  ConversationParticipant[]
+  messages     Message[]
+  participants ConversationParticipant[]
 }
 
 model ConversationParticipant {
@@ -839,11 +1036,11 @@ model ConversationParticipant {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   userId         String
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  hasUnread      Boolean      @default(false)
-  lastReadAt     DateTime?
 
-  joinedAt       DateTime     @default(now())
+  hasUnread  Boolean   @default(false)
+  lastReadAt DateTime?
+
+  joinedAt DateTime @default(now())
 
   @@unique([conversationId, userId])
 }
@@ -854,31 +1051,31 @@ model Message {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   senderId       String
   sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  
-  content        String       @db.Text
-  
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+
+  content String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Notification {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type        String   // e.g., "MESSAGE_RECEIVED", "APPLICATION_STATUS_UPDATED", "INTERVIEW_SCHEDULED"
-  title       String
-  message     String?  @db.Text
-  
-  isRead      Boolean  @default(false)
-  
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type    String // e.g., "MESSAGE_RECEIVED", "APPLICATION_STATUS_UPDATED", "INTERVIEW_SCHEDULED"
+  title   String
+  message String? @db.Text
+
+  isRead Boolean @default(false)
+
   // Optional linkage for deep linking
-  linkUrl     String?
-  
+  linkUrl String?
+
   // Entity references for programmatic access if needed
-  entityType  String?
-  entityId    String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  entityType String?
+  entityId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

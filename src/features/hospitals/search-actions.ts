@@ -12,6 +12,9 @@ export interface CandidateDirectoryFilterParams {
   readiness?: import("@prisma/client").ReadinessLabel
   openToOpportunities?: import("@prisma/client").OpenToOpportunities
   relocation?: boolean
+  hasPublications?: boolean
+  hasProcedures?: boolean
+  hasLeadership?: boolean
 }
 
 /**
@@ -39,6 +42,24 @@ export async function getHospitalCandidateDirectory(params: CandidateDirectoryFi
       },
       {
         educations: { some: { degree: { contains: keyword, mode: 'insensitive' } } }
+      },
+      {
+        clinicalProcedures: { some: { procedureName: { contains: keyword, mode: 'insensitive' } } }
+      },
+      {
+        publications: { some: { title: { contains: keyword, mode: 'insensitive' } } }
+      },
+      {
+        presentations: { some: { title: { contains: keyword, mode: 'insensitive' } } }
+      },
+      {
+        teachingRoles: { some: { roleTitle: { contains: keyword, mode: 'insensitive' } } }
+      },
+      {
+        awards: { some: { title: { contains: keyword, mode: 'insensitive' } } }
+      },
+      {
+        memberships: { some: { organization: { contains: keyword, mode: 'insensitive' } } }
       },
       // Privacy Rule: Name search ONLY if visible
       {
@@ -89,6 +110,18 @@ export async function getHospitalCandidateDirectory(params: CandidateDirectoryFi
 
   if (relocation === true) {
     structuredFilters.push({ preferences: { relocationWilling: true } })
+  }
+
+  if (params.hasPublications) {
+    structuredFilters.push({ publications: { some: {} } })
+  }
+
+  if (params.hasProcedures) {
+    structuredFilters.push({ clinicalProcedures: { some: {} } })
+  }
+
+  if (params.hasLeadership) {
+    structuredFilters.push({ leadershipRoles: { some: {} } })
   }
 
   // 1. Fetch discoverable profiles

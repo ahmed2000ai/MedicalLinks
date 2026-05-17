@@ -1,6 +1,6 @@
 import React from "react"
 import Link from "next/link"
-import { MapPin, Briefcase, Clock, Award, ShieldCheck, UserCircle } from "lucide-react"
+import { MapPin, Briefcase, Clock, Award, ShieldCheck, UserCircle, BookOpen, Activity, Globe } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { SaveCandidateButton } from "./SaveCandidateButton"
@@ -105,12 +105,27 @@ export function CandidateCard({ candidate, initialSaved = false }: CandidateCard
               <Award className="h-3 w-3" /> {board.boardName}
             </Badge>
           ))}
+          {candidate.languages && candidate.languages.length > 0 && (
+            <Badge variant="secondary" className="bg-slate-100 text-slate-600 font-normal flex gap-1 items-center shadow-none">
+              <Globe className="h-3 w-3" /> {candidate.languages.map((l: any) => l.language).join(", ")}
+            </Badge>
+          )}
+          {candidate.publications && candidate.publications.length > 0 && (
+            <Badge variant="secondary" className="bg-slate-100 text-slate-600 font-normal flex gap-1 items-center shadow-none">
+              <BookOpen className="h-3 w-3" /> {candidate.publications.length} Publication{candidate.publications.length > 1 ? "s" : ""}
+            </Badge>
+          )}
+          {candidate.clinicalProcedures && candidate.clinicalProcedures.length > 0 && (
+            <Badge variant="secondary" className="bg-slate-100 text-slate-600 font-normal flex gap-1 items-center shadow-none">
+              <Activity className="h-3 w-3" /> {candidate.clinicalProcedures.length} Procedure{candidate.clinicalProcedures.length > 1 ? "s" : ""}
+            </Badge>
+          )}
         </div>
 
         {/* Short Summary */}
-        {candidate.internalNotes && (
+        {candidate.professionalSummary && (
            <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">
-             {candidate.internalNotes}
+             {candidate.professionalSummary}
            </p>
         )}
 

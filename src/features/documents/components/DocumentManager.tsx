@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useTransition } from "react"
+import React, { useState, useTransition, useEffect } from "react"
 import { DocumentType } from "@prisma/client"
 import type { Document } from "@prisma/client"
 import {
@@ -19,12 +19,22 @@ import {
 
 interface DocumentManagerProps {
   documents: Document[]
+  initialUploadType?: DocumentType
 }
 
-export function DocumentManager({ documents }: DocumentManagerProps) {
+export function DocumentManager({ documents, initialUploadType }: DocumentManagerProps) {
   const [showUpload, setShowUpload] = useState(false)
-  const [uploadDefaultType, setUploadDefaultType] = useState<DocumentType | undefined>()
+  const [uploadDefaultType, setUploadDefaultType] = useState<DocumentType | undefined>(initialUploadType)
   const [, startTransition] = useTransition()
+
+  // Auto-open dialog when arriving via a typed deep link (e.g. ?type=DATAFLOW_REPORT)
+  useEffect(() => {
+    if (initialUploadType) {
+      setUploadDefaultType(initialUploadType)
+      setShowUpload(true)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const readiness = calculateCredentialReadiness(
     documents.map(d => ({

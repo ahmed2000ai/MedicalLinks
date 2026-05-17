@@ -1,7 +1,12 @@
+"use client"
+
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { AlertCircle, HelpCircle, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+
+// Context that lets child inputs know whether their parent FormField has an error
+export const FormFieldContext = React.createContext<{ hasError: boolean }>({ hasError: false })
 
 // -------------------------------------------------------------------------
 // FormSection — groups logically related fields in a card
@@ -44,28 +49,30 @@ interface FormFieldProps {
 
 export function FormField({ label, htmlFor, required, hint, error, children, className }: FormFieldProps) {
   return (
-    <div className={cn("space-y-1.5", className)}>
-      <label
-        htmlFor={htmlFor}
-        className="text-sm font-medium text-foreground leading-none"
-      >
-        {label}
-        {required && <span className="text-destructive ml-1" aria-hidden="true">*</span>}
-      </label>
-      {children}
-      {hint && !error && (
-        <p className="text-xs text-muted-foreground flex items-center gap-1">
-          <HelpCircle size={12} className="shrink-0" />
-          {hint}
-        </p>
-      )}
-      {error && (
-        <p className="text-xs text-destructive flex items-center gap-1" role="alert">
-          <AlertCircle size={12} className="shrink-0" />
-          {error}
-        </p>
-      )}
-    </div>
+    <FormFieldContext.Provider value={{ hasError: !!error }}>
+      <div className={cn("space-y-1.5", className)}>
+        <label
+          htmlFor={htmlFor}
+          className="text-sm font-medium text-foreground leading-none"
+        >
+          {label}
+          {required && <span className="text-destructive ml-1" aria-hidden="true">*</span>}
+        </label>
+        {children}
+        {hint && !error && (
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <HelpCircle size={12} className="shrink-0" />
+            {hint}
+          </p>
+        )}
+        {error && (
+          <p className="text-xs text-destructive flex items-center gap-1" role="alert">
+            <AlertCircle size={12} className="shrink-0" />
+            {error}
+          </p>
+        )}
+      </div>
+    </FormFieldContext.Provider>
   )
 }
 

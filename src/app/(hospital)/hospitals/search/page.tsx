@@ -19,6 +19,9 @@ export default async function CandidateSearchPage(
     readiness: searchParams.readiness as CandidateDirectoryFilterParams["readiness"] ?? undefined,
     openToOpportunities: searchParams.availability as CandidateDirectoryFilterParams["openToOpportunities"] ?? undefined,
     relocation: searchParams.relocation === "true" ? true : undefined,
+    hasPublications: searchParams.publications === "true" ? true : undefined,
+    hasProcedures: searchParams.procedures === "true" ? true : undefined,
+    hasLeadership: searchParams.leadership === "true" ? true : undefined,
   }
 
   const [candidates, savedIds] = await Promise.all([
@@ -26,7 +29,7 @@ export default async function CandidateSearchPage(
     getHospitalSavedCandidateIds()
   ])
 
-  const hasActiveFilters = !!(params.country || params.minExperience || params.readiness || params.openToOpportunities || params.relocation)
+  const hasActiveFilters = !!(params.country || params.minExperience || params.readiness || params.openToOpportunities || params.relocation || params.hasPublications || params.hasProcedures || params.hasLeadership)
 
   return (
     <div className="max-w-7xl mx-auto pb-12">

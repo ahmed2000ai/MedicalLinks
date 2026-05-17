@@ -16,6 +16,8 @@ import {
   WorkExperienceEntryInput,
   LicenseListSchema,
   LicenseEntryInput,
+  BoardCertificationListSchema,
+  BoardCertificationEntryInput,
   CertificationListSchema,
   CertificationEntryInput,
   LanguageListSchema,
@@ -94,6 +96,8 @@ export async function updateProfessionalSummary(data: ProfessionalSummaryInput) 
       professionalSummary: parsed.professionalSummary,
       totalYearsExperience: parsed.totalYearsExperience,
       postSpecialtyExp: parsed.postSpecialtyExperience,
+      specialty: parsed.specialty,
+      subspecialty: parsed.subspecialty,
       currentEmployer: parsed.currentEmployer,
       currentJobTitle: parsed.currentRole,
       noticePeriodDays: parsed.noticePeriod ? parseInt(parsed.noticePeriod, 10) || null : null,
@@ -227,6 +231,28 @@ export async function replaceLicenses(data: LicenseEntryInput[]) {
   return { success: true }
 }
 
+export async function replaceBoardCertifications(data: BoardCertificationEntryInput[]) {
+  const profileId = await getAuthorizedProfileId()
+  const parsed = BoardCertificationListSchema.parse(data)
+
+  await prisma.$transaction([
+    prisma.boardCertification.deleteMany({ where: { applicantProfileId: profileId } }),
+    prisma.boardCertification.createMany({
+      data: parsed.map((bc) => ({
+        applicantProfileId: profileId,
+        boardName: bc.boardName,
+        specialty: bc.specialty,
+        country: bc.country,
+        issueDate: bc.issueDate,
+        expiryDate: bc.expiryDate,
+      })),
+    }),
+  ])
+
+  revalidatePath("/profile")
+  return { success: true }
+}
+
 export async function replaceCertifications(data: CertificationEntryInput[]) {
   const profileId = await getAuthorizedProfileId()
   const parsed = CertificationListSchema.parse(data)
@@ -285,7 +311,6 @@ export async function updatePreferences(data: PreferencesInput) {
       relocationWilling: parsed.relocationWilling,
       visaSponsorshipReq: parsed.visaSponsorshipReq,
       expectedSalaryMin: parsed.expectedSalaryMin,
-      expectedSalaryMax: parsed.expectedSalaryMax,
     },
     create: {
       applicantProfileId: profileId,
@@ -294,7 +319,6 @@ export async function updatePreferences(data: PreferencesInput) {
       relocationWilling: parsed.relocationWilling,
       visaSponsorshipReq: parsed.visaSponsorshipReq,
       expectedSalaryMin: parsed.expectedSalaryMin,
-      expectedSalaryMax: parsed.expectedSalaryMax,
     },
   })
 
@@ -329,6 +353,142 @@ export async function clearCvExtraction() {
     }
   })
   
+  revalidatePath("/profile")
+  return { success: true }
+}
+import {
+  ClinicalProcedureListSchema, ClinicalProcedureEntryInput,
+  TrainingCourseListSchema, TrainingCourseEntryInput,
+  PublicationListSchema, PublicationEntryInput,
+  ConferencePresentationListSchema, ConferencePresentationEntryInput,
+  TeachingExperienceListSchema, TeachingExperienceEntryInput,
+  QualityImprovementListSchema, QualityImprovementEntryInput,
+  LeadershipRoleListSchema, LeadershipRoleEntryInput,
+  AwardListSchema, AwardEntryInput,
+  ProfessionalMembershipListSchema, ProfessionalMembershipEntryInput,
+  RefereeListSchema, RefereeEntryInput
+} from "./schemas"
+
+export async function replaceProfessionalActivities(data: {
+  clinicalProcedures?: ClinicalProcedureEntryInput[];
+  trainingCourses?: TrainingCourseEntryInput[];
+  publications?: PublicationEntryInput[];
+  presentations?: ConferencePresentationEntryInput[];
+  teachingRoles?: TeachingExperienceEntryInput[];
+  qiProjects?: QualityImprovementEntryInput[];
+  leadershipRoles?: LeadershipRoleEntryInput[];
+  awards?: AwardEntryInput[];
+  memberships?: ProfessionalMembershipEntryInput[];
+  referees?: RefereeEntryInput[];
+}) {
+  const profileId = await getAuthorizedProfileId()
+  
+  // To avoid massive transactions, we update sequentially or in a simple transaction
+  await prisma.$transaction(async (tx) => {
+    if (data.clinicalProcedures !== undefined) {
+      const parsed = ClinicalProcedureListSchema.parse(data.clinicalProcedures)
+      await tx.clinicalProcedure.deleteMany({ where: { applicantProfileId: profileId } })
+      if (parsed.length > 0) {
+        await tx.clinicalProcedure.createMany({
+          data: parsed.map(p => ({ ...p, applicantProfileId: profileId, id: undefined }))
+        })
+      }
+    }
+
+    if (data.trainingCourses !== undefined) {
+      const parsed = TrainingCourseListSchema.parse(data.trainingCourses)
+      await tx.trainingCourse.deleteMany({ where: { applicantProfileId: profileId } })
+      if (parsed.length > 0) {
+        await tx.trainingCourse.createMany({
+          data: parsed.map(p => ({ ...p, applicantProfileId: profileId, id: undefined }))
+        })
+      }
+    }
+
+    if (data.publications !== undefined) {
+      const parsed = PublicationListSchema.parse(data.publications)
+      await tx.publication.deleteMany({ where: { applicantProfileId: profileId } })
+      if (parsed.length > 0) {
+        await tx.publication.createMany({
+          data: parsed.map(p => ({ ...p, applicantProfileId: profileId, id: undefined }))
+        })
+      }
+    }
+
+    if (data.presentations !== undefined) {
+      const parsed = ConferencePresentationListSchema.parse(data.presentations)
+      await tx.conferencePresentation.deleteMany({ where: { applicantProfileId: profileId } })
+      if (parsed.length > 0) {
+        await tx.conferencePresentation.createMany({
+          data: parsed.map(p => ({ ...p, applicantProfileId: profileId, id: undefined }))
+        })
+      }
+    }
+
+    if (data.teachingRoles !== undefined) {
+      const parsed = TeachingExperienceListSchema.parse(data.teachingRoles)
+      await tx.teachingExperience.deleteMany({ where: { applicantProfileId: profileId } })
+      if (parsed.length > 0) {
+        await tx.teachingExperience.createMany({
+          data: parsed.map(p => ({ ...p, applicantProfileId: profileId, id: undefined }))
+        })
+      }
+    }
+
+    if (data.qiProjects !== undefined) {
+      const parsed = QualityImprovementListSchema.parse(data.qiProjects)
+      await tx.qualityImprovement.deleteMany({ where: { applicantProfileId: profileId } })
+      if (parsed.length > 0) {
+        await tx.qualityImprovement.createMany({
+          data: parsed.map(p => ({ ...p, applicantProfileId: profileId, id: undefined }))
+        })
+      }
+    }
+
+    if (data.leadershipRoles !== undefined) {
+      const parsed = LeadershipRoleListSchema.parse(data.leadershipRoles)
+      await tx.leadershipRole.deleteMany({ where: { applicantProfileId: profileId } })
+      if (parsed.length > 0) {
+        await tx.leadershipRole.createMany({
+          data: parsed.map(p => ({ ...p, applicantProfileId: profileId, id: undefined }))
+        })
+      }
+    }
+
+    if (data.awards !== undefined) {
+      const parsed = AwardListSchema.parse(data.awards)
+      await tx.award.deleteMany({ where: { applicantProfileId: profileId } })
+      if (parsed.length > 0) {
+        await tx.award.createMany({
+          data: parsed.map(p => ({ ...p, applicantProfileId: profileId, id: undefined }))
+        })
+      }
+    }
+
+    if (data.memberships !== undefined) {
+      const parsed = ProfessionalMembershipListSchema.parse(data.memberships)
+      await tx.professionalMembership.deleteMany({ where: { applicantProfileId: profileId } })
+      if (parsed.length > 0) {
+        await tx.professionalMembership.createMany({
+          data: parsed.map(p => ({ ...p, applicantProfileId: profileId, id: undefined }))
+        })
+      }
+    }
+
+    if (data.referees !== undefined) {
+      const parsed = RefereeListSchema.parse(data.referees)
+      await tx.referee.deleteMany({ where: { applicantProfileId: profileId } })
+      if (parsed.length > 0) {
+        await tx.referee.createMany({
+          data: parsed.map(p => ({ ...p, applicantProfileId: profileId, id: undefined }))
+        })
+      }
+    }
+  }, {
+    maxWait: 15000,
+    timeout: 20000
+  })
+
   revalidatePath("/profile")
   return { success: true }
 }

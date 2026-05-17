@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/ui/page-header"
-import { ProfileWizard } from "@/features/applicant-profile/components/ProfileWizard"
+import { ProfileEditor } from "@/features/applicant-profile/components/ProfileEditor"
 import { getApplicantProfile } from "@/features/applicant-profile/services"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
@@ -17,7 +17,7 @@ export default async function ProfilePage() {
         description="Complete your medical profile to unlock matching opportunities across the GCC." 
       />
       <div className="mt-6">
-        <ProfileWizard initialData={data || {}} />
+        <ProfileEditor initialData={data || {}} />
       </div>
     </div>
   )

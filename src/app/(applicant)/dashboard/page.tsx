@@ -89,10 +89,18 @@ export default async function DashboardPage() {
 
       {/* ── Alerts ───────────────────────────────────────────────────── */}
       {dataFlowStatus !== "ok" && (
-        <FeedbackAlert
-          type="warning"
-          message="Your DataFlow report has not been submitted. Upload it to unlock applications to UAE and Qatar hospital roles."
-        />
+        <div className="flex items-center gap-4 flex-wrap">
+          <FeedbackAlert
+            type="warning"
+            message="Your DataFlow report has not been submitted. Upload it to unlock applications to UAE and Qatar hospital roles."
+          />
+          <Link
+            href="/documents?type=DATAFLOW_REPORT"
+            className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 hover:text-amber-900 underline underline-offset-2 whitespace-nowrap"
+          >
+            Upload DataFlow Report <ArrowRight size={14} />
+          </Link>
+        </div>
       )}
 
       {/* ── Quick Start + Main Layout ────────────────────────────────── */}

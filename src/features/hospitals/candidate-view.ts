@@ -41,6 +41,24 @@ export async function getHospitalSafeDoctorPreview(profileId: string) {
         }
       },
       languages: true,
+      clinicalProcedures: true,
+      trainingCourses: true,
+      publications: {
+        orderBy: { year: "desc" }
+      },
+      presentations: {
+        orderBy: { year: "desc" }
+      },
+      teachingRoles: true,
+      qiProjects: {
+        orderBy: { year: "desc" }
+      },
+      leadershipRoles: true,
+      awards: {
+        orderBy: { year: "desc" }
+      },
+      memberships: true,
+      // Intentionally omitting 'referees' as they are strictly private
     }
   })
 

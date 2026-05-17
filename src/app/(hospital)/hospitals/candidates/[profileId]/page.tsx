@@ -16,6 +16,12 @@ import {
   MessageSquare,
   FileText,
   CheckCircle2,
+  Activity,
+  FileSignature,
+  Presentation,
+  Users,
+  Trophy,
+  ClipboardList,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -390,6 +396,202 @@ export default async function DoctorProfilePage({
               </div>
             </DetailSection>
           )}
+
+          {/* Clinical Procedures */}
+          {profile.clinicalProcedures?.length > 0 && (
+            <DetailSection title="Clinical Procedures & Competencies">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {profile.clinicalProcedures.map((proc: any) => (
+                  <div key={proc.id} className="flex gap-3 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <div className="mt-0.5 shrink-0">
+                      <Activity className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm">{proc.procedureName}</h4>
+                      <div className="flex flex-wrap gap-x-2 text-xs text-muted-foreground mt-0.5">
+                        {proc.experienceLevel && <span>{proc.experienceLevel}</span>}
+                        {proc.volume != null && <span>· {proc.volume} cases</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Quality Improvement / Audits */}
+          {profile.qiProjects?.length > 0 && (
+            <DetailSection title="Quality Improvement & Audits">
+              <div className="space-y-4">
+                {profile.qiProjects.map((qi: any) => (
+                  <div key={qi.id} className="flex gap-4">
+                    <div className="mt-0.5 p-2 rounded-lg bg-teal-50 border border-teal-100 shrink-0 h-fit">
+                      <ClipboardList className="h-4 w-4 text-teal-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm">{qi.projectTitle}</h4>
+                      <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground mt-1">
+                        {qi.role && <span>{qi.role}</span>}
+                        {qi.institution && <span>{qi.institution}</span>}
+                        {qi.year && <span>{qi.year}</span>}
+                      </div>
+                      {qi.outcome && (
+                        <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                          <span className="font-medium text-slate-700">Outcome:</span> {qi.outcome}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Publications */}
+          {profile.publications?.length > 0 && (
+            <DetailSection title="Publications">
+              <div className="space-y-4">
+                {profile.publications.map((pub: any) => (
+                  <div key={pub.id} className="flex gap-4">
+                    <div className="mt-0.5 p-2 rounded-lg bg-indigo-50 border border-indigo-100 shrink-0 h-fit">
+                      <FileSignature className="h-4 w-4 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm">{pub.title}</h4>
+                      {pub.authors && <p className="text-xs text-muted-foreground mt-0.5">{pub.authors}</p>}
+                      <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground mt-1">
+                        {pub.journal && <span className="italic">{pub.journal}</span>}
+                        {pub.year && <span>{pub.year}</span>}
+                        {pub.doi && <span>DOI: {pub.doi}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Presentations */}
+          {profile.presentations?.length > 0 && (
+            <DetailSection title="Conference Presentations">
+              <div className="space-y-4">
+                {profile.presentations.map((pres: any) => (
+                  <div key={pres.id} className="flex gap-4">
+                    <div className="mt-0.5 p-2 rounded-lg bg-orange-50 border border-orange-100 shrink-0 h-fit">
+                      <Presentation className="h-4 w-4 text-orange-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm">{pres.title}</h4>
+                      <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground mt-1">
+                        {pres.conferenceName && <span className="font-medium text-slate-700">{pres.conferenceName}</span>}
+                        {pres.location && <span>{pres.location}</span>}
+                        {pres.year && <span>{pres.year}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Teaching Experience */}
+          {profile.teachingRoles?.length > 0 && (
+            <DetailSection title="Teaching Experience">
+              <div className="space-y-4">
+                {profile.teachingRoles.map((teach: any) => (
+                  <div key={teach.id} className="flex gap-4">
+                    <div className="mt-0.5 p-2 rounded-lg bg-emerald-50 border border-emerald-100 shrink-0 h-fit">
+                      <Users className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm">{teach.roleTitle}</h4>
+                      <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground mt-1">
+                        {teach.institution && <span>{teach.institution}</span>}
+                        {teach.audienceType && <span>Audience: {teach.audienceType}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Leadership Roles */}
+          {profile.leadershipRoles?.length > 0 && (
+            <DetailSection title="Leadership & Committees">
+              <div className="space-y-4">
+                {profile.leadershipRoles.map((lead: any) => (
+                  <div key={lead.id} className="flex gap-4">
+                    <div className="mt-0.5 p-2 rounded-lg bg-slate-100 border border-slate-200 shrink-0 h-fit">
+                      <Briefcase className="h-4 w-4 text-slate-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm">{lead.roleTitle}</h4>
+                      <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground mt-1">
+                        {lead.organization && <span>{lead.organization}</span>}
+                        {(lead.startDate || lead.endDate) && (
+                          <span>
+                            {lead.startDate ? new Date(lead.startDate).getFullYear() : "?"} —{" "}
+                            {lead.endDate ? new Date(lead.endDate).getFullYear() : "Present"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Courses & Workshops */}
+          {profile.trainingCourses?.length > 0 && (
+            <DetailSection title="Courses & Workshops">
+              <div className="space-y-4">
+                {profile.trainingCourses.map((course: any) => (
+                  <div key={course.id} className="flex gap-4">
+                    <div className="mt-0.5 p-2 rounded-lg bg-rose-50 border border-rose-100 shrink-0 h-fit">
+                      <BookOpen className="h-4 w-4 text-rose-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm">{course.title}</h4>
+                      <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground mt-1">
+                        {course.provider && <span>{course.provider}</span>}
+                        {course.location && <span>{course.location}</span>}
+                        {course.startDate && <span>{new Date(course.startDate).getFullYear()}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Awards & Honors */}
+          {profile.awards?.length > 0 && (
+            <DetailSection title="Awards & Honors">
+              <div className="space-y-4">
+                {profile.awards.map((award: any) => (
+                  <div key={award.id} className="flex gap-4">
+                    <div className="mt-0.5 p-2 rounded-lg bg-yellow-50 border border-yellow-100 shrink-0 h-fit">
+                      <Trophy className="h-4 w-4 text-yellow-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm">{award.title}</h4>
+                      <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground mt-1">
+                        {award.awardingOrganization && <span>{award.awardingOrganization}</span>}
+                        {award.year && <span>{award.year}</span>}
+                      </div>
+                      {award.description && (
+                        <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                          {award.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DetailSection>
+          )}
         </div>
 
         {/* Right sidebar */}
@@ -572,6 +774,34 @@ export default async function DoctorProfilePage({
                         ? ` · Exp. ${new Date(cert.expiryDate).toLocaleDateString(undefined, { month: "short", year: "numeric" })}`
                         : ""}
                     </p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Professional Memberships */}
+          {profile.memberships?.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Memberships
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 space-y-3">
+                {profile.memberships.map((mem: any) => (
+                  <div key={mem.id} className="text-sm">
+                    <p className="font-medium text-slate-800">{mem.organization}</p>
+                    <div className="flex flex-wrap gap-x-2 text-xs text-muted-foreground">
+                      {mem.membershipType && <span>{mem.membershipType}</span>}
+                      {mem.startDate && (
+                        <span>
+                          ({new Date(mem.startDate).getFullYear()} -{" "}
+                          {mem.endDate ? new Date(mem.endDate).getFullYear() : "Present"})
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </CardContent>

@@ -49,8 +49,11 @@ export function CandidateFilters() {
   const [readiness, setReadiness] = useState(searchParams.get("readiness") || "")
   const [availability, setAvailability] = useState(searchParams.get("availability") || "")
   const [relocation, setRelocation] = useState(searchParams.get("relocation") === "true")
+  const [hasPublications, setHasPublications] = useState(searchParams.get("publications") === "true")
+  const [hasProcedures, setHasProcedures] = useState(searchParams.get("procedures") === "true")
+  const [hasLeadership, setHasLeadership] = useState(searchParams.get("leadership") === "true")
 
-  const hasActiveFilters = country || minExperience || readiness || availability || relocation
+  const hasActiveFilters = country || minExperience || readiness || availability || relocation || hasPublications || hasProcedures || hasLeadership
 
   const handleApply = () => {
     const params = new URLSearchParams(searchParams)
@@ -60,6 +63,9 @@ export function CandidateFilters() {
     if (readiness) params.set("readiness", readiness); else params.delete("readiness")
     if (availability) params.set("availability", availability); else params.delete("availability")
     if (relocation) params.set("relocation", "true"); else params.delete("relocation")
+    if (hasPublications) params.set("publications", "true"); else params.delete("publications")
+    if (hasProcedures) params.set("procedures", "true"); else params.delete("procedures")
+    if (hasLeadership) params.set("leadership", "true"); else params.delete("leadership")
 
     router.push(`${pathname}?${params.toString()}`)
   }
@@ -70,6 +76,9 @@ export function CandidateFilters() {
     setReadiness("")
     setAvailability("")
     setRelocation(false)
+    setHasPublications(false)
+    setHasProcedures(false)
+    setHasLeadership(false)
 
     const params = new URLSearchParams(searchParams)
     params.delete("country")
@@ -77,6 +86,9 @@ export function CandidateFilters() {
     params.delete("readiness")
     params.delete("availability")
     params.delete("relocation")
+    params.delete("publications")
+    params.delete("procedures")
+    params.delete("leadership")
 
     router.push(`${pathname}?${params.toString()}`)
   }
@@ -186,6 +198,45 @@ export function CandidateFilters() {
         <Label htmlFor="relocation" className="text-sm text-slate-700 cursor-pointer leading-snug">
           Willing to relocate to GCC
         </Label>
+      </div>
+
+      {/* Advanced Professional Signals */}
+      <div className="space-y-3 pt-4 border-t border-slate-100">
+        <Label className="text-xs font-medium text-slate-600 uppercase tracking-wide">
+          Advanced Signals
+        </Label>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="publications"
+              checked={hasPublications}
+              onCheckedChange={(val) => setHasPublications(val === true)}
+            />
+            <Label htmlFor="publications" className="text-sm text-slate-700 cursor-pointer leading-snug">
+              Has Publications
+            </Label>
+          </div>
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="procedures"
+              checked={hasProcedures}
+              onCheckedChange={(val) => setHasProcedures(val === true)}
+            />
+            <Label htmlFor="procedures" className="text-sm text-slate-700 cursor-pointer leading-snug">
+              Has Clinical Procedures
+            </Label>
+          </div>
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="leadership"
+              checked={hasLeadership}
+              onCheckedChange={(val) => setHasLeadership(val === true)}
+            />
+            <Label htmlFor="leadership" className="text-sm text-slate-700 cursor-pointer leading-snug">
+              Has Leadership Roles
+            </Label>
+          </div>
+        </div>
       </div>
 
       <Button onClick={handleApply} className="w-full">
