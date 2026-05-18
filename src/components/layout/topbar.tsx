@@ -11,13 +11,13 @@ export async function Topbar() {
 
   return (
     <header className="h-16 border-b bg-card flex items-center justify-between px-4 md:px-6">
-      <div className="hidden md:block w-1/3 min-w-[200px]">
+      <div className="flex-1 min-w-0 mr-3 md:mr-0 md:w-1/3 md:min-w-[200px] md:flex-none">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
             type="search" 
-            placeholder="Search doctors, roles, or hospitals..." 
-            className="pl-9 bg-background w-full"
+            placeholder="Search..." 
+            className="pl-9 bg-background w-full text-sm"
           />
         </div>
       </div>
